@@ -4,6 +4,8 @@ mod storage;
 
 use clap::{Parser, Subcommand};
 
+use crate::commands::cmd_get;
+
 /// Odyn — reproducible vendoring for Odin projects.
 ///
 /// Manages dependencies by cloning Git repositories into `vendor/`
@@ -88,12 +90,12 @@ enum Commands {
     Status,
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Get { source, name } => {
-            println!("get: {} as {:?}", source, name);
+            cmd_get(source, name)?;
         }
         Commands::Sync => {
             println!("sync");
@@ -121,5 +123,6 @@ fn main() {
                 println!("init: without src/ directory")
             }
         }
-    }
+    };
+    Ok(())
 }
