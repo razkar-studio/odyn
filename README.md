@@ -2,7 +2,7 @@
 
 <img src="banner.svg" alt="Odyn" width="100%"/>
 
-**Reproducible vendoring for Odin. Not a package manager.**
+### Reproducible vendoring for Odin. Not a package manager.
 
 [![License MIT](https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue?style=flat-square)](https://codeberg.org/razkar/odyn/src/branch/main/LICENSE-MIT)
 [![Built with Rust](https://img.shields.io/badge/built%20with-Rust-orange?style=flat-square&logo=rust)](https://www.rust-lang.org/)
