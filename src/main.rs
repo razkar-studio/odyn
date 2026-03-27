@@ -24,19 +24,19 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Clone a dependency into odyn_deps/ and pin it in Odyn.lock.
+    /// Clone a dependency into `odyn_deps/` and pin it in Odyn.lock.
     ///
     /// Clones the repository at SOURCE and checks out its current HEAD.
-    /// The resulting folder is placed at odyn_deps/<name>, where <name>
+    /// The resulting folder is placed at `odyn_deps/<name>`, where `<name>`
     /// defaults to the repository name if not specified.
     Get {
-        /// Git URL or user/repo shorthand to the dependency.
+        /// Git URL or `user/repo` shorthand to the dependency.
         source: String,
 
-        /// Name for the odyn_deps/ subfolder. Defaults to the repo name.
+        /// Name for the `odyn_deps/` subfolder. Defaults to the repo name.
         name: Option<String>,
 
-        /// Platform to resolve user/repo shorthand against. Defaults to github.
+        /// Platform to resolve `user/repo` shorthand against. Defaults to github.
         /// Options: github, codeberg, gitlab, sourcehut, bitbucket, framagit,
         /// disroot, notabug, savannah
         #[arg(long, default_value = "github")]
@@ -57,26 +57,26 @@ enum Commands {
         #[arg(long, default_value = "mit")]
         license: String,
 
-        /// Add a README.md stub to the project root.
+        /// Add a `README.md` stub to the project root.
         #[arg(long)]
         with_readme: bool,
 
-        /// Skip creating the src/ directory.
+        /// Skip creating the `src/` directory.
         #[arg(long)]
         no_src: bool,
     },
 
-    /// Sync odyn_deps/ to match Odyn.lock exactly.
+    /// Sync `odyn_deps/` to match Odyn.lock exactly.
     ///
     /// Re-clones missing dependencies and resets existing ones to their
-    /// pinned commits. Errors if any odyn_deps/ folder has uncommitted
+    /// pinned commits. Errors if any `odyn_deps/` folder has uncommitted
     /// local changes. Safe to run multiple times — always produces
     /// the same result.
     Sync,
 
-    /// Remove a dependency from odyn_deps/ and Odyn.lock.
+    /// Remove a dependency from `odyn_deps/` and Odyn.lock.
     ///
-    /// Deletes odyn_deps/<name> and strips the corresponding entry from
+    /// Deletes `odyn_deps/<name>` and strips the corresponding entry from
     /// Odyn.lock. Does not touch other dependencies, even if they
     /// share a transitive source.
     Remove {
@@ -96,14 +96,14 @@ enum Commands {
 
     /// Show the current state of all vendored dependencies.
     ///
-    /// Checks each entry in Odyn.lock against its folder in odyn_deps/
+    /// Checks each entry in Odyn.lock against its folder in `odyn_deps/`
     /// and reports whether it is clean, missing, or modified.
     Status,
 
     /// Updates Odyn itself to the latest version.
     ///
     /// Not yet implemented. Download the latest binary from
-    /// https://codeberg.org/razkar/odyn/releases
+    /// <https://codeberg.org/razkar/odyn/releases>
     #[command(name = "update-self")]
     UpdateSelf,
 }

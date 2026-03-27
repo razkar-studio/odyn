@@ -1,7 +1,10 @@
 use std::path::PathBuf;
 
 use crate::{
-    constants::*,
+    constants::{
+        APACHE_LICENSE, BSD2_LICENSE, BSD3_LICENSE, DEPS_DIR, GPL3_LICENSE, ISC_LICENSE,
+        MIT_LICENSE, MPL2_LICENSE, OLS_JSON, UNLICENSE, ZLIB_LICENSE,
+    },
     storage::{
         Dep, DepState, Lockfile, check_git, gen_main_odin, load_lockfile, save_lockfile,
         save_lockfile_at,
@@ -23,14 +26,14 @@ pub(crate) fn cmd_init(
     }
 
     std::fs::create_dir_all(root.join(DEPS_DIR))?;
-    if !no_src {
+    if no_src {
+        std::fs::write(root.join("main.odin"), gen_main_odin(&project_name))?;
+    } else {
         std::fs::create_dir_all(root.join("src"))?;
         std::fs::write(
             root.join("src").join("main.odin"),
             gen_main_odin(&project_name),
         )?;
-    } else {
-        std::fs::write(root.join("main.odin"), gen_main_odin(&project_name))?;
     }
 
     if with_readme {
@@ -195,9 +198,7 @@ pub(crate) fn cmd_sync() -> Result<()> {
     let mut result: Vec<(&Dep, DepState)> = Vec::new();
     for dep in &lockfile.dep {
         let dep_path: PathBuf = PathBuf::from(DEPS_DIR).join(&dep.name);
-        if !dep_path.exists() {
-            result.push((dep, DepState::Missing))
-        } else {
+        if dep_path.exists() {
             let output = std::process::Command::new("git")
                 .arg("rev-parse")
                 .arg("HEAD")
@@ -208,10 +209,12 @@ pub(crate) fn cmd_sync() -> Result<()> {
                 .trim()
                 .to_string();
             if commit == dep.commit {
-                result.push((dep, DepState::Ok))
+                result.push((dep, DepState::Ok));
             } else {
-                result.push((dep, DepState::Modified { actual: commit }))
+                result.push((dep, DepState::Modified { actual: commit }));
             }
+        } else {
+            result.push((dep, DepState::Missing));
         }
     }
 
@@ -283,9 +286,9 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
         || source.starts_with("file://")
         || source.len() >= 3
             && source
-                .chars().next()
-                .map(|c| c.is_ascii_alphabetic())
-                .unwrap_or(false)
+                .chars()
+                .next()
+                .is_some_and(|c| c.is_ascii_alphabetic())
             && source.chars().nth(1) == Some(':')
             && (source.chars().nth(2) == Some('\\') || source.chars().nth(2) == Some('/'));
 
@@ -300,7 +303,7 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
             "github" => "https://github.com",
             "codeberg" => "https://codeberg.org",
             "gitlab" => "https://gitlab.com",
-            "sourcehut" => "https://git.sr.ht",
+            "sourcehut" | "sr.ht" => "https://git.sr.ht",
             "bitbucket" => "https://bitbucket.org",
             "gitea" => {
                 return Err(anyhow!(
@@ -311,7 +314,6 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
             "notabug" => "https://notabug.org",
             "disroot" => "https://git.disroot.org",
             "framagit" => "https://framagit.org",
-            "sr.ht" => "https://git.sr.ht",
             other => {
                 return Err(anyhow!(
                     "unknown platform '{other}'. use a full URL instead, e.g. https://{other}/{source}"
@@ -323,8 +325,13 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
         source
     };
 
-    let name: String =
-        name.unwrap_or_else(|| source.split('/').next_back().unwrap_or("unknown").to_string());
+    let name: String = name.unwrap_or_else(|| {
+        source
+            .split('/')
+            .next_back()
+            .unwrap_or("unknown")
+            .to_string()
+    });
     let name: String = name.strip_suffix(".git").unwrap_or(&name).to_string();
 
     check_git()?;

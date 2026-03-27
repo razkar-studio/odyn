@@ -461,7 +461,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
 "#;
 
-pub const ZLIB_LICENSE: &str = r#"zlib License
+pub const ZLIB_LICENSE: &str = r"zlib License
 
 Copyright (c) 2026
 
@@ -482,7 +482,7 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 
 3. This notice may not be removed or altered from any source distribution.
-"#;
+";
 
 pub const ISC_LICENSE: &str = r#"ISC License
 
