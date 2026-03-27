@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::{
-    constants::{DEPS_DIR, OLS_JSON},
+    constants::*,
     storage::{
         Dep, DepState, Lockfile, check_git, gen_main_odin, load_lockfile, save_lockfile,
         save_lockfile_at,
@@ -41,8 +41,15 @@ pub(crate) fn cmd_init(
 
     save_lockfile_at(&Lockfile { dep: Vec::new() }, &root)?;
     let license_content: String = match license.to_lowercase().as_str() {
-        "mit" => "MIT License\n\nCopyright (c) ...\n".to_string(),
-        "apache" => "Apache License 2.0\n\n...".to_string(),
+        "mit" => MIT_LICENSE.to_string(),
+        "apache" => APACHE_LICENSE.to_string(),
+        "gpl3" => GPL3_LICENSE.to_string(),
+        "bsd2" => BSD2_LICENSE.to_string(),
+        "bsd3" => BSD3_LICENSE.to_string(),
+        "mpl2" => MPL2_LICENSE.to_string(),
+        "unlicense" => UNLICENSE.to_string(),
+        "zlib" => ZLIB_LICENSE.to_string(),
+        "isc" => ISC_LICENSE.to_string(),
         other => format!("License: {other}\n"),
     };
 
