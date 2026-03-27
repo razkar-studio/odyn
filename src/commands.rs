@@ -49,6 +49,17 @@ pub(crate) fn cmd_init(
     Ok(())
 }
 
+pub(crate) fn cmd_remove(name: String) -> Result<()> {
+    let mut lockfile: Lockfile = load_lockfile()?;
+    if !lockfile.dep.iter().any(|dep| dep.name == name) {
+        return Err(anyhow!("dependency '{name}' not found in Odyn.lock"));
+    }
+    std::fs::remove_dir_all(PathBuf::from(DEPS_DIR).join(&name))?;
+    lockfile.dep.retain(|d| d.name != name);
+    save_lockfile(&lockfile)?;
+    Ok(())
+}
+
 pub(crate) fn cmd_sync() -> Result<()> {
     check_git()?;
     let lockfile: Lockfile = load_lockfile()?;

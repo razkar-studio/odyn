@@ -5,7 +5,7 @@ mod storage;
 use clap::{Parser, Subcommand};
 use farben::{cprintln, style};
 
-use crate::commands::{cmd_get, cmd_init, cmd_sync};
+use crate::commands::{cmd_get, cmd_init, cmd_remove, cmd_sync};
 
 /// Odyn — reproducible vendoring for Odin projects.
 ///
@@ -139,7 +139,9 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             cmd_sync()?;
         }
         Commands::Remove { name } => {
-            println!("remove: {}", name);
+            status("Removing", "load", &format!("'{name}'..."));
+            cmd_remove(name)?;
+            status("Removed", "success", "dependency removed");
         }
         Commands::Update { name } => {
             println!("update: {}", name);

@@ -1,0 +1,34 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0d1f35"/>
+      <stop offset="100%" style="stop-color:#1f5084"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="300" fill="url(#bg)" rx="12"/>
+
+  <text
+    x="600"
+    y="180"
+    font-family="'Segoe UI', 'Helvetica Neue', sans-serif"
+    font-size="124"
+    font-weight="800"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-2"
+  >Odyn</text>
+
+  <text
+    x="600"
+    y="230"
+    font-family="'Segoe UI', 'Helvetica Neue', sans-serif"
+    font-size="18"
+    font-weight="400"
+    fill="white"
+    text-anchor="middle"
+    opacity="0.6"
+    letter-spacing="1"
+  >Reproducible vendoring for Odin</text>
+
+</svg>
