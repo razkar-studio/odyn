@@ -283,8 +283,7 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
         || source.starts_with("file://")
         || source.len() >= 3
             && source
-                .chars()
-                .nth(0)
+                .chars().next()
                 .map(|c| c.is_ascii_alphabetic())
                 .unwrap_or(false)
             && source.chars().nth(1) == Some(':')
@@ -325,7 +324,7 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
     };
 
     let name: String =
-        name.unwrap_or_else(|| source.split('/').last().unwrap_or("unknown").to_string());
+        name.unwrap_or_else(|| source.split('/').next_back().unwrap_or("unknown").to_string());
     let name: String = name.strip_suffix(".git").unwrap_or(&name).to_string();
 
     check_git()?;
