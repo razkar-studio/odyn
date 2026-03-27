@@ -111,6 +111,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
+name = "farben"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37a86e3ff47b44a60fa34e4709b81e4246f72cb3dfcc96326758f32e3487567a"
+dependencies = [
+ "farben-core",
+]
+
+[[package]]
+name = "farben-core"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa8360acf1bbeabbc2ad5de0b256adb3122a7832c7b003f1a5b6a0997722ce4b"
+
+[[package]]
 name = "hashbrown"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -144,6 +159,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "farben",
  "serde",
  "toml",
 ]

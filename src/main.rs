@@ -3,12 +3,13 @@ mod constants;
 mod storage;
 
 use clap::{Parser, Subcommand};
+use farben::{cprintln, style};
 
-use crate::commands::cmd_get;
+use crate::commands::{cmd_get, cmd_init, cmd_sync};
 
 /// Odyn — reproducible vendoring for Odin projects.
 ///
-/// Manages dependencies by cloning Git repositories into `vendor/`
+/// Manages dependencies by cloning Git repositories into `odyn_deps/`
 /// and pinning exact commits in `Odyn.lock`. No registry, no solver,
 /// no magic.
 #[derive(Parser)]
@@ -20,23 +21,23 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Clone a dependency into vendor/ and pin it in Odyn.lock.
+    /// Clone a dependency into odyn_deps/ and pin it in Odyn.lock.
     ///
     /// Clones the repository at SOURCE and checks out its current HEAD.
-    /// The resulting folder is placed at vendor/<name>, where <name>
+    /// The resulting folder is placed at odyn_deps/<name>, where <name>
     /// defaults to the repository name if not specified.
     Get {
         /// Git URL or local path to the dependency.
         source: String,
 
-        /// Name for the vendor/ subfolder. Defaults to the repo name.
+        /// Name for the odyn_deps/ subfolder. Defaults to the repo name.
         name: Option<String>,
     },
 
     /// Create a new Odin project with the standard layout.
     ///
     /// Scaffolds a new project directory containing `src/main.odin`,
-    /// an empty `vendor/`, and an empty `Odyn.lock`. Pass flags to
+    /// an empty `odyn_deps/`, and an empty `Odyn.lock`. Pass flags to
     /// adjust what gets generated.
     Init {
         /// Name of the project directory to create.
@@ -55,17 +56,17 @@ enum Commands {
         no_src: bool,
     },
 
-    /// Sync vendor/ to match Odyn.lock exactly.
+    /// Sync odyn_deps/ to match Odyn.lock exactly.
     ///
     /// Re-clones missing dependencies and resets existing ones to their
-    /// pinned commits. Errors if any vendor/ folder has uncommitted
+    /// pinned commits. Errors if any odyn_deps/ folder has uncommitted
     /// local changes. Safe to run multiple times — always produces
     /// the same result.
     Sync,
 
-    /// Remove a dependency from vendor/ and Odyn.lock.
+    /// Remove a dependency from odyn_deps/ and Odyn.lock.
     ///
-    /// Deletes vendor/<name> and strips the corresponding entry from
+    /// Deletes odyn_deps/<name> and strips the corresponding entry from
     /// Odyn.lock. Does not touch other dependencies, even if they
     /// share a transitive source.
     Remove {
@@ -85,20 +86,57 @@ enum Commands {
 
     /// Show the current state of all vendored dependencies.
     ///
-    /// Checks each entry in Odyn.lock against its folder in vendor/
+    /// Checks each entry in Odyn.lock against its folder in odyn_deps/
     /// and reports whether it is clean, missing, or modified.
     Status,
 }
 
-fn main() -> anyhow::Result<()> {
+pub(crate) fn init_styles() {
+    style!("load", "[bold blue]");
+    style!("success", "[load]");
+    style!("warn", "[load]");
+    style!("error", "[bold red]"); // ansi red because pure red hurts my eyes
+    style!("info", "[load]");
+    style!("done", "[load]");
+}
+
+pub(crate) fn status(label: &str, style: &str, message: &str) {
+    cprintln!("[{style}]{:>12}[/] {message}", label);
+}
+
+fn main() {
+    init_styles();
     let cli = Cli::parse();
 
+    if let Err(e) = run(cli) {
+        status("Error", "error", &e.to_string());
+        std::process::exit(1);
+    }
+}
+
+fn run(cli: Cli) -> anyhow::Result<()> {
     match cli.command {
         Commands::Get { source, name } => {
+            status("Getting", "load", &format!("'{source}'..."));
             cmd_get(source, name)?;
+            status("Done", "success", "dependency added");
+        }
+        Commands::Init {
+            project_name,
+            license,
+            with_readme,
+            no_src,
+        } => {
+            status(
+                "Creating",
+                "load",
+                &format!("odin project '{project_name}'"),
+            );
+            cmd_init(project_name.clone(), license, with_readme, no_src)?;
+            status("Created", "success", &format!("'{project_name}'"));
         }
         Commands::Sync => {
-            println!("sync");
+            cmd_sync()?;
         }
         Commands::Remove { name } => {
             println!("remove: {}", name);
@@ -109,20 +147,6 @@ fn main() -> anyhow::Result<()> {
         Commands::Status => {
             println!("status");
         }
-        Commands::Init {
-            project_name,
-            license,
-            with_readme,
-            no_src,
-        } => {
-            println!("init: {project_name} with license {license}");
-            if with_readme {
-                println!("init: with readme");
-            }
-            if no_src {
-                println!("init: without src/ directory")
-            }
-        }
-    };
+    }
     Ok(())
 }
