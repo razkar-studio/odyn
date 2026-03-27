@@ -271,7 +271,6 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
         || source.starts_with("./")
         || source.starts_with("../")
         || source.starts_with('~')
-        || source.starts_with("./")
         || source.starts_with(".\\")
         || source.starts_with("..\\")
         || source.starts_with("file://")

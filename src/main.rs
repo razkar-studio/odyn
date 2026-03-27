@@ -30,7 +30,7 @@ enum Commands {
     /// The resulting folder is placed at odyn_deps/<name>, where <name>
     /// defaults to the repository name if not specified.
     Get {
-        /// Git URL or local path to the dependency.
+        /// Git URL or user/repo shorthand to the dependency.
         source: String,
 
         /// Name for the odyn_deps/ subfolder. Defaults to the repo name.
