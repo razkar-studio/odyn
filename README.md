@@ -31,6 +31,39 @@ odyn sync
 
 `odyn init` gives you a working project layout with `ols.json` already configured, so your editor's autocomplete works out of the box. `odyn get` clones and pins. `odyn sync` makes everything match the lockfile, on any machine, every time.
 
+## Installation
+
+### Build From Source
+
+Requires Rust 1.85.0 or newer.
+
+```sh
+git clone https://codeberg.org/razkar/odyn.git
+cd odyn
+cargo build --release
+```
+
+Binary lands at `target/release/odyn`. Put it on your `PATH`.
+
+Prebuilt binaries are coming soon. For now, building from source is the way.
+
+### Using Cargo
+
+Cargo is the official build system and package manager for the Rust programming language.
+Since Odyn is available at [crates.io](https://crates.io), the central package registry, 
+you can simply run the following command if you have `cargo` installed.
+
+```sh
+cargo install odyn
+```
+
+Put the result in your `PATH`
+
+### Codeberg Releases
+
+By the time you're reading this, [the Codeberg repository](https://codeberg.org/razkar/odyn) has probably posted a Release.
+Install the binary there.
+
 ## Commands
 
 Commands marked ✅ are complete and stable.
@@ -87,19 +120,9 @@ Pass the collection to the compiler when building:
 odin run src -collection:deps=odyn_deps
 ```
 
-## Building from Source
+## Changelog
 
-Requires Rust 1.85.0 or newer.
-
-```sh
-git clone https://codeberg.org/razkar/odyn.git
-cd odyn
-cargo build --release
-```
-
-Binary lands at `target/release/odyn`. Put it on your `PATH`.
-
-Prebuilt binaries are coming soon. For now, building from source is the way.
+See [CHANGELOG.md](CHANGELOG.md) for a full history of changes.
 
 ## License
 
