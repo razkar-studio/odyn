@@ -18,7 +18,7 @@ pub(crate) struct Lockfile {
 }
 
 pub(crate) fn check_git() -> Result<()> {
-    match std::process::Command::new("git").arg("--version").status() {
+    match std::process::Command::new("git").arg("--version").output() {
         Ok(_) => Ok(()),
         Err(_) => Err(anyhow!("git is not installed on your machine")),
     }

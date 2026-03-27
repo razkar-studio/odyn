@@ -1,17 +1,20 @@
 mod commands;
 mod constants;
 mod storage;
+mod ui;
 
 use clap::{Parser, Subcommand};
-use farben::{cprintln, style};
 
-use crate::commands::{cmd_get, cmd_init, cmd_remove, cmd_sync};
+use ui::{init_styles, status};
 
-/// Odyn — reproducible vendoring for Odin projects.
+use crate::commands::{
+    cmd_get, cmd_init, cmd_remove, cmd_status, cmd_sync, cmd_update, cmd_update_self,
+};
+
+/// Odyn: reproducible vendoring for Odin projects.
 ///
 /// Manages dependencies by cloning Git repositories into `odyn_deps/`
-/// and pinning exact commits in `Odyn.lock`. No registry, no solver,
-/// no magic.
+/// and pinning exact commits in `Odyn.lock`.
 #[derive(Parser)]
 #[command(name = "odyn", about = "Reproducible vendoring for Odin projects")]
 struct Cli {
@@ -32,6 +35,11 @@ enum Commands {
 
         /// Name for the odyn_deps/ subfolder. Defaults to the repo name.
         name: Option<String>,
+
+        /// Platform to resolve user/repo shorthand against.
+        /// Defaults to github. Options: github, codeberg, gitlab, sourcehut
+        #[arg(long, default_value = "github")]
+        platform: String,
     },
 
     /// Create a new Odin project with the standard layout.
@@ -78,7 +86,7 @@ enum Commands {
     ///
     /// Fetches the latest commit from the dependency's source URL and
     /// updates the entry in Odyn.lock. Only the named dependency is
-    /// affected — no transitive updates.
+    /// affected, no transitive updates.
     Update {
         /// Name of the dependency to update, as it appears in Odyn.lock.
         name: String,
@@ -89,19 +97,13 @@ enum Commands {
     /// Checks each entry in Odyn.lock against its folder in odyn_deps/
     /// and reports whether it is clean, missing, or modified.
     Status,
-}
 
-pub(crate) fn init_styles() {
-    style!("load", "[bold blue]");
-    style!("success", "[load]");
-    style!("warn", "[load]");
-    style!("error", "[bold red]"); // ansi red because pure red hurts my eyes
-    style!("info", "[load]");
-    style!("done", "[load]");
-}
-
-pub(crate) fn status(label: &str, style: &str, message: &str) {
-    cprintln!("[{style}]{:>12}[/] {message}", label);
+    /// Updates Odyn itself to the latest version.
+    ///
+    /// Fetches the latest release from Odyn's Codeberg repository
+    /// and updates Odyn itself.
+    #[command(name = "update-self")]
+    UpdateSelf,
 }
 
 fn main() {
@@ -116,9 +118,13 @@ fn main() {
 
 fn run(cli: Cli) -> anyhow::Result<()> {
     match cli.command {
-        Commands::Get { source, name } => {
-            status("Getting", "load", &format!("'{source}'..."));
-            cmd_get(source, name)?;
+        Commands::Get {
+            source,
+            name,
+            platform,
+        } => {
+            status("Getting", "load", &format!("'{source}'"));
+            cmd_get(source, name, platform)?;
             status("Done", "success", "dependency added");
         }
         Commands::Init {
@@ -139,15 +145,18 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             cmd_sync()?;
         }
         Commands::Remove { name } => {
-            status("Removing", "load", &format!("'{name}'..."));
+            status("Removing", "load", &format!("'{name}'"));
             cmd_remove(name)?;
             status("Removed", "success", "dependency removed");
         }
         Commands::Update { name } => {
-            println!("update: {}", name);
+            cmd_update(name)?;
+        }
+        Commands::UpdateSelf => {
+            cmd_update_self()?;
         }
         Commands::Status => {
-            println!("status");
+            cmd_status()?;
         }
     }
     Ok(())
