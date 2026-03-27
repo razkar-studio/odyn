@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="banner.svg" alt="Odyn" width="100%"/>
+<img src="banner.svg" alt="Odyn" width="80%"/>
 
 ### Reproducible vendoring for Odin. Not a package manager.
 
