@@ -90,7 +90,7 @@ pub(crate) fn cmd_update(name: String) -> Result<()> {
     }
 
     let reset_status = std::process::Command::new("git")
-        .args(["reset", "--hard", "origin/HEAD", "--quiet"])
+        .args(["reset", "--hard", "--quiet", "origin/HEAD"])
         .current_dir(&dep_path)
         .status()?;
     if !reset_status.success() {
@@ -229,7 +229,7 @@ pub(crate) fn cmd_sync() -> Result<()> {
                 &actual[..7]
             );
         }
-        status("Error", "error", "try 'update'ing the package");
+        status("Hint", "info", "revert local changes to run sync");
         return Err(anyhow!("sync failed: modified dependencies found"));
     }
 
@@ -267,6 +267,29 @@ pub(crate) fn cmd_sync() -> Result<()> {
 }
 
 pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) -> Result<()> {
+    let looks_local = source.starts_with('/')
+        || source.starts_with("./")
+        || source.starts_with("../")
+        || source.starts_with('~')
+        || source.starts_with("./")
+        || source.starts_with(".\\")
+        || source.starts_with("..\\")
+        || source.starts_with("file://")
+        || source.len() >= 3
+            && source
+                .chars()
+                .nth(0)
+                .map(|c| c.is_ascii_alphabetic())
+                .unwrap_or(false)
+            && source.chars().nth(1) == Some(':')
+            && (source.chars().nth(2) == Some('\\') || source.chars().nth(2) == Some('/'));
+
+    if looks_local {
+        return Err(anyhow!(
+            "local paths aren't supported. push '{source}' to a Git remote and use that URL instead"
+        ));
+    }
+
     let source = if !source.contains("://") && source.matches('/').count() == 1 {
         let base = match platform.to_lowercase().as_str() {
             "github" => "https://github.com",
@@ -283,7 +306,7 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
             "notabug" => "https://notabug.org",
             "disroot" => "https://git.disroot.org",
             "framagit" => "https://framagit.org",
-            "sr.ht" => "https://git.sr.ht", // just sourcehut? lmao
+            "sr.ht" => "https://git.sr.ht",
             other => {
                 return Err(anyhow!(
                     "unknown platform '{other}'. use a full URL instead, e.g. https://{other}/{source}"
