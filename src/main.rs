@@ -36,8 +36,9 @@ enum Commands {
         /// Name for the odyn_deps/ subfolder. Defaults to the repo name.
         name: Option<String>,
 
-        /// Platform to resolve user/repo shorthand against.
-        /// Defaults to github. Options: github, codeberg, gitlab, sourcehut
+        /// Platform to resolve user/repo shorthand against. Defaults to github.
+        /// Options: github, codeberg, gitlab, sourcehut, bitbucket, framagit,
+        /// disroot, notabug, savannah
         #[arg(long, default_value = "github")]
         platform: String,
     },
@@ -51,7 +52,8 @@ enum Commands {
         /// Name of the project directory to create.
         project_name: String,
 
-        /// SPDX license identifier to use for the LICENSE file.
+        /// License to generate. Defaults to mit.
+        /// Options: mit, apache, gpl3, bsd2, bsd3, mpl2, unlicense, zlib, isc
         #[arg(long, default_value = "mit")]
         license: String,
 
@@ -100,8 +102,8 @@ enum Commands {
 
     /// Updates Odyn itself to the latest version.
     ///
-    /// Fetches the latest release from Odyn's Codeberg repository
-    /// and updates Odyn itself.
+    /// Not yet implemented. Download the latest binary from
+    /// https://codeberg.org/razkar/odyn/releases
     #[command(name = "update-self")]
     UpdateSelf,
 }

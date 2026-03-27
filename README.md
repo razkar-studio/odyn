@@ -49,7 +49,7 @@ Commands marked ✅ are complete and stable.
 
 | Flag | Description |
 |---|---|
-| `--license <type>` | License file to generate. Defaults to `mit`, also accepts `apache` |
+| `--license <type>` | License file to generate. Defaults to `mit`, also accepts `apache`, `gpl3`, `bsd2`, `bsd3`, `mpl2`, `unlicense`, `zlib`, and `isc` |
 | `--with-readme` | Add a `README.md` stub |
 | `--no-src` | Skip the `src/` directory |
 
@@ -57,7 +57,7 @@ Commands marked ✅ are complete and stable.
 
 | Flag | Description |
 |---|---|
-| `--platform <name>` | Platform to resolve `user/repo` against. Defaults to `github`. Supports `github`, `codeberg`, `gitlab`, `sourcehut`, `bitbucket`, `framagit`, `disroot`, `notabug`, `savannah` |
+| `--platform <name>` | Platform to resolve `user/repo` against. Defaults to `github`. Supports `github`, `codeberg`, `gitlab`, `sourcehut`, `bitbucket`, `framagit`, `disroot`, `notabug`, and `savannah` |
 
 ## The Lockfile
 
