@@ -89,7 +89,7 @@ Here are the supported platforms on the manual binary, if not from source:
 Sorry for the lack of support for macOS users! I'm on a Linux machine and these are the targets that I can cross-compile to from Linux.
 Don't worry, the next release will partly use GitHub Actions to build, which supports running on these Mac targets.
 
-For Windows AMD PCs, I'm currently waiting on GitHub Actions to add runner support there. Maybe soon. 
+For Windows ARM PCs, I'm currently waiting on GitHub Actions to add runner support there. Maybe soon. 
 
 ## Commands
 
