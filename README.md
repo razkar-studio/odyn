@@ -86,8 +86,7 @@ Here are the supported platforms on the manual binary, if not from source:
 > Mac Intel users download `x86_64`. If you're on Linux, you probably know which architecture you have, just note that it supports
 > all distros.
 
-Sorry for the lack of support for macOS users! I'm on a Linux machine and these are the targets that I can cross-compile to from Linux.
-Don't worry, the next release will partly use GitHub Actions to build, which supports running on these Mac targets.
+Sorry for the lack of macOS support! The next release will partly use GitHub Actions which has native macOS runners, so both targets are coming in 0.2.0 and above.
 
 For Windows ARM PCs, I'm currently waiting on GitHub Actions to add runner support there. Maybe soon. 
 
