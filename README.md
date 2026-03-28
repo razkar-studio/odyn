@@ -68,7 +68,7 @@ Here are the supported platforms on the manual binary, if not from source:
 |------------------|--------------|-------------------------------|
 | **Windows**      | x86_64/AMD64 | :white_check_mark: Supported  |
 |                  | i686 (32-bit)| :white_check_mark: Supported  |
-|                  | aarch64      | :soon: Coming Soon            |
+|                  | aarch64      | :soon: Maybe Soon             |
 | **macOS**        | aarch64      | :soon: Coming Soon            |
 |                  | x86_64       | :soon: Coming Soon            |
 | **Linux**        | x86_64       | :white_check_mark: Supported  |
@@ -77,7 +77,7 @@ Here are the supported platforms on the manual binary, if not from source:
 |                  | i686         | :white_check_mark: Supported  |
 |                  | RISC-V 64    | :white_check_mark: Supported  |
 | *FreeBSD*        | x86_64       | :white_check_mark: Supported  |
-|                  | aarch64      | :soon: Coming Soon            |
+|                  | aarch64      | :x: Not Available             |
 |                  | i686         | :white_check_mark: Supported  |
 | *Others*         | Others       | Build from source / Use Cargo |
 
