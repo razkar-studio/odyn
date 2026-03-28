@@ -45,7 +45,7 @@ cargo build --release
 
 Binary lands at `target/release/odyn`. Put it on your `PATH`.
 
-Prebuilt binaries are coming soon. For now, building from source is the way.
+Prebuilt binaries are now available in the Releases tab. Refer [here](#codeberg-releases).
 
 ### Using Cargo
 
