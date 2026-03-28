@@ -1,0 +1,63 @@
+name: Release (macOS)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-macos-x86_64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-apple-darwin
+
+      - name: Build
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: Strip
+        run: strip target/x86_64-apple-darwin/release/odyn
+
+      - name: Rename
+        run: cp target/x86_64-apple-darwin/release/odyn odyn-macos-x86_64
+
+      - name: Upload to Codeberg release
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @odyn-macos-x86_64 \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=odyn-macos-x86_64"
+
+  build-macos-aarch64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-apple-darwin
+
+      - name: Build
+        run: cargo build --release --target aarch64-apple-darwin
+
+      - name: Strip
+        run: strip target/aarch64-apple-darwin/release/odyn
+
+      - name: Rename
+        run: cp target/aarch64-apple-darwin/release/odyn odyn-macos-aarch64
+
+      - name: Upload to Codeberg release
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @odyn-macos-aarch64 \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=odyn-macos-aarch64"

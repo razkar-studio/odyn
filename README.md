@@ -61,21 +61,46 @@ Put the result in your `PATH`
 
 ### Codeberg Releases
 
-By the time you're reading this, [the Codeberg repository](https://codeberg.org/razkar/odyn) has probably posted a Release.
-Install the binary there.
+By the time you're reading this, [the Codeberg repository](https://codeberg.org/razkar/odyn/releases) has probably posted a Release. Install the binary that fits your system there, and put it in your `PATH`. 
+Here are the supported platforms on the manual binary, if not from source:
+
+| Operating System | Architecture |             Status            |
+|------------------|--------------|-------------------------------|
+| **Windows**      | x86_64/AMD64 | :white_check_mark: Supported  |
+|                  | i686 (32-bit)| :white_check_mark: Supported  |
+|                  | aarch64      | :soon: Coming Soon            |
+| **macOS**        | aarch64      | :soon: Coming Soon            |
+|                  | x86_64       | :soon: Coming Soon            |
+| **Linux**        | x86_64       | :white_check_mark: Supported  |
+|                  | x86_64 musl  | :white_check_mark: Supported  |
+|                  | aarch64      | :white_check_mark: Supported  |
+|                  | i686         | :white_check_mark: Supported  |
+|                  | RISC-V 64    | :white_check_mark: Supported  |
+| *FreeBSD*        | x86_64       | :white_check_mark: Supported  |
+|                  | aarch64      | :soon: Coming Soon            |
+|                  | i686         | :white_check_mark: Supported  |
+| *Others*         | Others       | Build from source / Use Cargo |
+
+> [!NOTE]
+> If you're on Windows but unsure, download `x86_64` (or check your system). Apple Silicon (M1/M2/M3 and friends) download `aarch64`,
+> Mac Intel users download `x86_64`. If you're on Linux, you probably know which architecture you have, just note that it supports
+> all distros.
+
+> Sorry for the lack of support for macOS users! I'm on a Linux machine and these are the targets that I can cross-compile to from Linux.
+> Don't worry, the next release will partly use GitHub Actions to build, which supports running on these Mac targets.
 
 ## Commands
 
-Commands marked ✅ are complete and stable.
+Commands marked :white_check_mark: are complete and stable.
 
 | Command | Description |
 |---|---|
-| ✅ `odyn init <name>` | New Odin project with `src/`, `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` |
-| ✅ `odyn get <source> [name]` | Clone a dependency and pin its commit. Accepts `user/repo` shorthand or a full URL |
-| ✅ `odyn sync` | Make `odyn_deps/` match `Odyn.lock`. Re-clones missing deps, errors on modified ones |
-| ✅ `odyn status` | Report every dependency as ok, missing, or modified. Exits non-zero if anything is wrong |
-| ✅ `odyn update <name>` | Pull the latest commit for a dependency and re-pin it |
-| ✅ `odyn remove <name>` | Delete the folder and remove the entry from `Odyn.lock` |
+| :white_check_mark: `odyn init <name>` | New Odin project with `src/`, `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` |
+| :white_check_mark: `odyn get <source> [name]` | Clone a dependency and pin its commit. Accepts `user/repo` shorthand or a full URL |
+| :white_check_mark: `odyn sync` | Make `odyn_deps/` match `Odyn.lock`. Re-clones missing deps, errors on modified ones |
+| :white_check_mark: `odyn status` | Report every dependency as ok, missing, or modified. Exits non-zero if anything is wrong |
+| :white_check_mark: `odyn update <name>` | Pull the latest commit for a dependency and re-pin it |
+| :white_check_mark: `odyn remove <name>` | Delete the folder and remove the entry from `Odyn.lock` |
 | `odyn update-self` | Update Odyn itself *(coming soon)* |
 
 ### `odyn init` flags

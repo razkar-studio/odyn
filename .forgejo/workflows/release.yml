@@ -1,0 +1,231 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-linux-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-linux-gnu
+      - name: Build
+        run: cargo build --release --target x86_64-unknown-linux-gnu
+      - name: Strip
+        run: strip target/x86_64-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/x86_64-unknown-linux-gnu/release/odyn odyn-linux-x86_64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-x86_64
+          path: odyn-linux-x86_64
+
+  build-linux-x86_64-musl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-linux-musl
+      - name: Install musl tools
+        run: sudo apt-get install -y musl-tools
+      - name: Build
+        run: cargo build --release --target x86_64-unknown-linux-musl
+      - name: Strip
+        run: strip target/x86_64-unknown-linux-musl/release/odyn
+      - name: Rename
+        run: cp target/x86_64-unknown-linux-musl/release/odyn odyn-linux-x86_64-musl
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-x86_64-musl
+          path: odyn-linux-x86_64-musl
+
+  build-linux-aarch64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target aarch64-unknown-linux-gnu
+      - name: Strip
+        run: strip target/aarch64-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/aarch64-unknown-linux-gnu/release/odyn odyn-linux-aarch64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-aarch64
+          path: odyn-linux-aarch64
+
+  build-linux-i686:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: i686-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target i686-unknown-linux-gnu
+      - name: Strip
+        run: strip target/i686-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/i686-unknown-linux-gnu/release/odyn odyn-linux-i686
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-i686
+          path: odyn-linux-i686
+
+  build-linux-riscv64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: riscv64gc-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target riscv64gc-unknown-linux-gnu
+      - name: Strip
+        run: strip target/riscv64gc-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/riscv64gc-unknown-linux-gnu/release/odyn odyn-linux-riscv64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-riscv64
+          path: odyn-linux-riscv64
+
+  build-windows-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-pc-windows-gnu
+      - name: Install mingw
+        run: sudo apt-get install -y gcc-mingw-w64-x86-64
+      - name: Build
+        run: cargo build --release --target x86_64-pc-windows-gnu
+      - name: Rename
+        run: cp target/x86_64-pc-windows-gnu/release/odyn.exe odyn-windows-x86_64.exe
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-windows-x86_64
+          path: odyn-windows-x86_64.exe
+
+  build-windows-i686:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: i686-pc-windows-gnu
+      - name: Install mingw
+        run: sudo apt-get install -y gcc-mingw-w64-i686
+      - name: Build
+        run: cargo build --release --target i686-pc-windows-gnu
+      - name: Rename
+        run: cp target/i686-pc-windows-gnu/release/odyn.exe odyn-windows-i686.exe
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-windows-i686
+          path: odyn-windows-i686.exe
+
+  build-freebsd-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-freebsd
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target x86_64-unknown-freebsd
+      - name: Strip
+        run: strip target/x86_64-unknown-freebsd/release/odyn
+      - name: Rename
+        run: cp target/x86_64-unknown-freebsd/release/odyn odyn-freebsd-x86_64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-freebsd-x86_64
+          path: odyn-freebsd-x86_64
+
+  build-freebsd-i686:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: i686-unknown-freebsd
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target i686-unknown-freebsd
+      - name: Strip
+        run: strip target/i686-unknown-freebsd/release/odyn
+      - name: Rename
+        run: cp target/i686-unknown-freebsd/release/odyn odyn-freebsd-i686
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-freebsd-i686
+          path: odyn-freebsd-i686
+
+  release:
+    needs:
+      - build-linux-x86_64
+      - build-linux-x86_64-musl
+      - build-linux-aarch64
+      - build-linux-i686
+      - build-linux-riscv64
+      - build-windows-x86_64
+      - build-windows-i686
+      - build-freebsd-x86_64
+      - build-freebsd-i686
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      - name: Create release
+        uses: actions/forgejo-release@v2
+        with:
+          direction: upload
+          tag: ${{ github.ref_name }}
+          release-dir: .
+          token: ${{ secrets.RELEASE_TOKEN }}
