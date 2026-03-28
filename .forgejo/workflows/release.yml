@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-linux-x86_64:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -28,7 +28,7 @@ jobs:
           path: odyn-linux-x86_64
 
   build-linux-x86_64-musl:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -51,7 +51,7 @@ jobs:
           path: odyn-linux-x86_64-musl
 
   build-linux-aarch64:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -74,7 +74,7 @@ jobs:
           path: odyn-linux-aarch64
 
   build-linux-i686:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -97,7 +97,7 @@ jobs:
           path: odyn-linux-i686
 
   build-linux-riscv64:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -120,7 +120,7 @@ jobs:
           path: odyn-linux-riscv64
 
   build-windows-x86_64:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -141,7 +141,7 @@ jobs:
           path: odyn-windows-x86_64.exe
 
   build-windows-i686:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -162,7 +162,7 @@ jobs:
           path: odyn-windows-i686.exe
 
   build-freebsd-x86_64:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -185,7 +185,7 @@ jobs:
           path: odyn-freebsd-x86_64
 
   build-freebsd-i686:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -218,7 +218,7 @@ jobs:
       - build-windows-i686
       - build-freebsd-x86_64
       - build-freebsd-i686
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
