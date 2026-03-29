@@ -119,6 +119,328 @@ jobs:
           name: odyn-linux-riscv64
           path: odyn-linux-riscv64
 
+  build-linux-aarch64-musl:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-musl
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target aarch64-unknown-linux-musl
+      - name: Strip
+        run: strip target/aarch64-unknown-linux-musl/release/odyn
+      - name: Rename
+        run: cp target/aarch64-unknown-linux-musl/release/odyn odyn-linux-aarch64-musl
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-aarch64-musl
+          path: odyn-linux-aarch64-musl
+
+  build-linux-i686-musl:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: i686-unknown-linux-musl
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target i686-unknown-linux-musl
+      - name: Strip
+        run: strip target/i686-unknown-linux-musl/release/odyn
+      - name: Rename
+        run: cp target/i686-unknown-linux-musl/release/odyn odyn-linux-i686-musl
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-i686-musl
+          path: odyn-linux-i686-musl
+
+  build-linux-armv7:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7-unknown-linux-gnueabihf
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target armv7-unknown-linux-gnueabihf
+      - name: Strip
+        run: strip target/armv7-unknown-linux-gnueabihf/release/odyn
+      - name: Rename
+        run: cp target/armv7-unknown-linux-gnueabihf/release/odyn odyn-linux-armv7
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-armv7
+          path: odyn-linux-armv7
+
+  build-linux-armv7-musl:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7-unknown-linux-musleabihf
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target armv7-unknown-linux-musleabihf
+      - name: Strip
+        run: strip target/armv7-unknown-linux-musleabihf/release/odyn
+      - name: Rename
+        run: cp target/armv7-unknown-linux-musleabihf/release/odyn odyn-linux-armv7-musl
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-armv7-musl
+          path: odyn-linux-armv7-musl
+
+  build-linux-armv6:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: arm-unknown-linux-gnueabihf
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target arm-unknown-linux-gnueabihf
+      - name: Strip
+        run: strip target/arm-unknown-linux-gnueabihf/release/odyn
+      - name: Rename
+        run: cp target/arm-unknown-linux-gnueabihf/release/odyn odyn-linux-armv6
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-armv6
+          path: odyn-linux-armv6
+
+  build-linux-armv6-musl:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: arm-unknown-linux-musleabihf
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target arm-unknown-linux-musleabihf
+      - name: Strip
+        run: strip target/arm-unknown-linux-musleabihf/release/odyn
+      - name: Rename
+        run: cp target/arm-unknown-linux-musleabihf/release/odyn odyn-linux-armv6-musl
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-armv6-musl
+          path: odyn-linux-armv6-musl
+
+  build-linux-powerpc64:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: powerpc64-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target powerpc64-unknown-linux-gnu
+      - name: Strip
+        run: strip target/powerpc64-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/powerpc64-unknown-linux-gnu/release/odyn odyn-linux-powerpc64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-powerpc64
+          path: odyn-linux-powerpc64
+
+  build-linux-powerpc64le:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: powerpc64le-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target powerpc64le-unknown-linux-gnu
+      - name: Strip
+        run: strip target/powerpc64le-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/powerpc64le-unknown-linux-gnu/release/odyn odyn-linux-powerpc64le
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-powerpc64le
+          path: odyn-linux-powerpc64le
+
+  build-linux-s390x:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: s390x-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target s390x-unknown-linux-gnu
+      - name: Strip
+        run: strip target/s390x-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/s390x-unknown-linux-gnu/release/odyn odyn-linux-s390x
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-s390x
+          path: odyn-linux-s390x
+
+  build-linux-sparc64:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: sparc64-unknown-linux-gnu
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target sparc64-unknown-linux-gnu
+      - name: Strip
+        run: strip target/sparc64-unknown-linux-gnu/release/odyn
+      - name: Rename
+        run: cp target/sparc64-unknown-linux-gnu/release/odyn odyn-linux-sparc64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-linux-sparc64
+          path: odyn-linux-sparc64
+
+  build-netbsd-x86_64:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-netbsd
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target x86_64-unknown-netbsd
+      - name: Strip
+        run: strip target/x86_64-unknown-netbsd/release/odyn
+      - name: Rename
+        run: cp target/x86_64-unknown-netbsd/release/odyn odyn-netbsd-x86_64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-netbsd-x86_64
+          path: odyn-netbsd-x86_64
+
+  build-android-aarch64:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-linux-android
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target aarch64-linux-android
+      - name: Strip
+        run: strip target/aarch64-linux-android/release/odyn
+      - name: Rename
+        run: cp target/aarch64-linux-android/release/odyn odyn-android-aarch64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-android-aarch64
+          path: odyn-android-aarch64
+
+  build-android-armv7:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7-linux-androideabi
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target armv7-linux-androideabi
+      - name: Strip
+        run: strip target/armv7-linux-androideabi/release/odyn
+      - name: Rename
+        run: cp target/armv7-linux-androideabi/release/odyn odyn-android-armv7
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-android-armv7
+          path: odyn-android-armv7
+
+  build-android-x86_64:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-linux-android
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Build
+        run: cross build --release --target x86_64-linux-android
+      - name: Strip
+        run: strip target/x86_64-linux-android/release/odyn
+      - name: Rename
+        run: cp target/x86_64-linux-android/release/odyn odyn-android-x86_64
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: odyn-android-x86_64
+          path: odyn-android-x86_64
+
   build-windows-x86_64:
     runs-on: docker
     steps:
@@ -212,16 +534,34 @@ jobs:
       - build-linux-x86_64
       - build-linux-x86_64-musl
       - build-linux-aarch64
+      - build-linux-aarch64-musl
       - build-linux-i686
+      - build-linux-i686-musl
       - build-linux-riscv64
+      - build-linux-armv7
+      - build-linux-armv7-musl
+      - build-linux-armv6
+      - build-linux-armv6-musl
+      - build-linux-powerpc64
+      - build-linux-powerpc64le
+      - build-linux-s390x
+      - build-linux-sparc64
       - build-windows-x86_64
       - build-windows-i686
       - build-freebsd-x86_64
       - build-freebsd-i686
+      - build-netbsd-x86_64
+      - build-android-aarch64
+      - build-android-armv7
+      - build-android-x86_64
     runs-on: docker
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
+
+      - name: Generate SHA256SUMS
+        run: sha256sum odyn-* > SHA256SUMS
+
       - name: Create release
         uses: actions/forgejo-release@v2
         with:

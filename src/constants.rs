@@ -1,5 +1,6 @@
 pub const LOCKFILE: &str = "Odyn.lock";
 pub const DEPS_DIR: &str = "odyn_deps/";
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub const OLS_JSON: &str = r#"{
     "collections": [

@@ -61,3 +61,30 @@ jobs:
             -H "Content-Type: application/octet-stream" \
             --data-binary @odyn-macos-aarch64 \
             "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=odyn-macos-aarch64"
+
+  generate-sums:
+    needs:
+      - build-macos-x86_64
+      - build-macos-aarch64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download x86_64
+        run: |
+          curl -L -o odyn-macos-x86_64 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-macos-x86_64"
+
+      - name: Download aarch64
+        run: |
+          curl -L -o odyn-macos-aarch64 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-macos-aarch64"
+
+      - name: Generate SHA256SUMS-macos
+        run: sha256sum odyn-macos-* > SHA256SUMS-macos
+
+      - name: Upload SHA256SUMS-macos
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @SHA256SUMS-macos \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=SHA256SUMS-macos"

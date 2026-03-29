@@ -41,6 +41,10 @@ enum Commands {
         /// disroot, notabug, savannah
         #[arg(long, default_value = "github")]
         platform: String,
+
+        /// Pin a specific commit instead of HEAD.
+        #[arg(long)]
+        commit: Option<String>,
     },
 
     /// Create a new Odin project with the standard layout.
@@ -72,7 +76,15 @@ enum Commands {
     /// pinned commits. Errors if any `odyn_deps/` folder has uncommitted
     /// local changes. Safe to run multiple times — always produces
     /// the same result.
-    Sync,
+    Sync {
+        /// Force revert locally modified changes instead of aborting
+        #[arg(long)]
+        force: bool,
+
+        /// Skip checking a specific dependency entirely. Chainable.
+        #[arg(long)]
+        skip: Vec<String>,
+    },
 
     /// Remove a dependency from `odyn_deps/` and Odyn.lock.
     ///
@@ -100,10 +112,11 @@ enum Commands {
     /// and reports whether it is clean, missing, or modified.
     Status,
 
-    /// Updates Odyn itself to the latest version.
+    /// Updates Odyn itself to the latest stable release.
     ///
-    /// Not yet implemented. Download the latest binary from
-    /// <https://codeberg.org/razkar/odyn/releases>
+    /// Downloads the appropriate binary for your platform from
+    /// <https://codeberg.org/razkar/odyn/releases> and replaces
+    /// the current executable.
     #[command(name = "update-self")]
     UpdateSelf,
 }
@@ -124,9 +137,10 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             source,
             name,
             platform,
+            commit,
         } => {
             status("Getting", "load", &format!("'{source}'"));
-            cmd_get(source, name, platform)?;
+            cmd_get(source, name, platform, commit)?;
             status("Done", "success", "dependency added");
         }
         Commands::Init {
@@ -143,8 +157,8 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             cmd_init(project_name.clone(), license, with_readme, no_src)?;
             status("Created", "success", &format!("'{project_name}'"));
         }
-        Commands::Sync => {
-            cmd_sync()?;
+        Commands::Sync { force, skip } => {
+            cmd_sync(force, skip)?;
         }
         Commands::Remove { name } => {
             status("Removing", "load", &format!("'{name}'"));

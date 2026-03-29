@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::{
     constants::{
         APACHE_LICENSE, BSD2_LICENSE, BSD3_LICENSE, DEPS_DIR, GPL3_LICENSE, ISC_LICENSE,
-        MIT_LICENSE, MPL2_LICENSE, OLS_JSON, UNLICENSE, ZLIB_LICENSE,
+        MIT_LICENSE, MPL2_LICENSE, OLS_JSON, UNLICENSE, VERSION, ZLIB_LICENSE,
     },
     storage::{
         Dep, DepState, Lockfile, check_git, gen_main_odin, load_lockfile, save_lockfile,
@@ -13,6 +13,7 @@ use crate::{
 };
 use anyhow::{Result, anyhow};
 use farben::ceprintln;
+use sha2::{Digest, Sha256};
 
 pub(crate) fn cmd_init(
     project_name: String,
@@ -61,12 +62,138 @@ pub(crate) fn cmd_init(
 }
 
 pub(crate) fn cmd_update_self() -> Result<()> {
-    status("Soon", "info", "update-self is not yet implemented");
+    let os = std::env::consts::OS;
+    let arch = std::env::consts::ARCH;
+
+    let binary_name = match (os, arch) {
+        ("linux", "x86_64") => "odyn-linux-x86_64",
+        ("linux", "aarch64") => "odyn-linux-aarch64",
+        ("linux", "x86") => "odyn-linux-i686",
+        ("linux", "riscv64") => "odyn-linux-riscv64",
+        ("linux", "arm") => "odyn-linux-armv7", // defaults to armv7, armv6 users install manually
+        ("linux", "powerpc64") => "odyn-linux-powerpc64le", // defaults to LE, modern POWER
+        ("linux", "s390x") => "odyn-linux-s390x",
+        ("linux", "sparc64") => "odyn-linux-sparc64",
+        // MIPS: all variants failed, build from source
+        // musl: can't detect at runtime, install manually from Releases
+        ("windows", "x86_64") => "odyn-windows-x86_64.exe",
+        ("windows", "x86") => "odyn-windows-i686.exe",
+
+        ("macos", "x86_64") => "odyn-macos-x86_64",
+        ("macos", "aarch64") => "odyn-macos-aarch64",
+
+        ("android", "x86_64") => "odyn-android-x86_64",
+        ("android", "aarch64") => "odyn-android-aarch64",
+        ("android", "arm") => "odyn-android-armv7",
+
+        ("freebsd", "x86_64") => "odyn-freebsd-x86_64",
+        ("freebsd", "x86") => "odyn-freebsd-i686",
+
+        ("netbsd", "x86_64") => "odyn-netbsd-x86_64",
+        _ => {
+            return Err(anyhow!(
+                "unsupported platform ({os}/{arch}). install manually from https://codeberg.org/razkar/odyn/releases, use Cargo, or build from source."
+            ));
+        }
+    };
+
+    let body = ureq::get("https://codeberg.org/api/v1/repos/razkar/odyn/releases/latest")
+        .call()
+        .map_err(|e| anyhow!("failed to fetch latest release: {e}"))?
+        .body_mut()
+        .read_to_string()?;
+
+    let latest = body
+        .split("\"tag_name\":\"")
+        .nth(1)
+        .and_then(|s| s.split('"').next())
+        .ok_or_else(|| anyhow!("could not parse release info from Codeberg API"))?
+        .trim_start_matches('v');
+
+    if latest == VERSION {
+        status(
+            "UpToDate",
+            "success",
+            &format!("already on latest version ({VERSION})"),
+        );
+        return Ok(());
+    }
+
     status(
-        "Info",
-        "info",
-        "download the latest binary from https://codeberg.org/razkar/odyn/releases",
+        "Update",
+        "load",
+        &format!("new version available: {VERSION} → {latest}"),
     );
+
+    let url = format!("https://codeberg.org/razkar/odyn/releases/download/v{latest}/{binary_name}");
+    let temp_path = std::env::temp_dir().join(binary_name);
+
+    let response = ureq::get(&url)
+        .call()
+        .map_err(|e| anyhow!("failed to download update: {e}"))?;
+
+    let mut temp_file = std::fs::File::create(&temp_path)?;
+    std::io::copy(&mut response.into_body().as_reader(), &mut temp_file)?;
+
+    let metadata = std::fs::metadata(&temp_path)?;
+    if metadata.len() == 0 {
+        std::fs::remove_file(&temp_path)?;
+        return Err(anyhow!("downloaded file is empty, aborting update"));
+    }
+
+    let sums_filename = if os == "macos" {
+        "SHA256SUMS-macos"
+    } else {
+        "SHA256SUMS"
+    };
+
+    let sums = ureq::get(&format!(
+        "https://codeberg.org/razkar/odyn/releases/download/v{latest}/{sums_filename}"
+    ))
+    .call()
+    .map_err(|e| anyhow!("failed to fetch SHA256SUMS: {e}"))?
+    .body_mut()
+    .read_to_string()?;
+
+    let expected = sums
+        .lines()
+        .find(|l| l.contains(binary_name))
+        .and_then(|l| l.split_whitespace().next())
+        .ok_or_else(|| anyhow!("could not find hash for '{binary_name}' in SHA256SUMS"))?;
+
+    let bytes = std::fs::read(&temp_path)?;
+    let hash = Sha256::digest(&bytes);
+    let actual = hash
+        .iter()
+        .map(|b| format!("{:02x}", b))
+        .collect::<String>();
+    if actual != expected {
+        std::fs::remove_file(&temp_path)?;
+        return Err(anyhow!(
+            "SHA256 mismatch! expected {expected}, got {actual}. aborting update."
+        ));
+    }
+    status("Verified", "success", "SHA256 checksum verified");
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&temp_path, std::fs::Permissions::from_mode(0o755))?;
+    }
+
+    let current_exe = std::env::current_exe()?;
+
+    #[cfg(target_os = "windows")]
+    std::fs::rename(&current_exe, current_exe.with_extension("exe.old"))?;
+
+    std::fs::rename(&temp_path, &current_exe)?;
+
+    status("Updated", "success", &format!("odyn updated to v{latest}"));
+    status("Info", "info", "restart odyn for changes to take effect");
+
+    #[cfg(target_os = "windows")]
+    std::fs::remove_file(current_exe.with_extension("exe.old")).ok();
+
     Ok(())
 }
 
@@ -186,7 +313,7 @@ pub(crate) fn cmd_status() -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_sync() -> Result<()> {
+pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
     check_git()?;
     let lockfile: Lockfile = load_lockfile()?;
 
@@ -197,6 +324,9 @@ pub(crate) fn cmd_sync() -> Result<()> {
 
     let mut result: Vec<(&Dep, DepState)> = Vec::new();
     for dep in &lockfile.dep {
+        if skip.contains(&dep.name) {
+            continue;
+        }
         let dep_path: PathBuf = PathBuf::from(DEPS_DIR).join(&dep.name);
         if dep_path.exists() {
             let output = std::process::Command::new("git")
@@ -209,9 +339,13 @@ pub(crate) fn cmd_sync() -> Result<()> {
                 .trim()
                 .to_string();
             if commit == dep.commit {
-                result.push((dep, DepState::Ok));
+                result.push((dep, DepState::Ok))
             } else {
-                result.push((dep, DepState::Modified { actual: commit }));
+                if force {
+                    result.push((dep, DepState::Missing))
+                } else {
+                    result.push((dep, DepState::Modified { actual: commit }))
+                }
             }
         } else {
             result.push((dep, DepState::Missing));
@@ -247,14 +381,22 @@ pub(crate) fn cmd_sync() -> Result<()> {
         let dep_path: PathBuf = PathBuf::from(DEPS_DIR).join(&dep.name);
         match state {
             DepState::Missing => {
-                status("Syncing", "load", &format!("'{}', cloning...", dep.name));
-                let clone_status = std::process::Command::new("git")
-                    .arg("clone")
-                    .arg(&dep.source)
-                    .arg(&dep_path)
-                    .status()?;
-                if !clone_status.success() {
-                    return Err(anyhow!("failed to clone '{}'", dep.name));
+                if !dep_path.exists() {
+                    status("Syncing", "load", &format!("'{}', cloning...", dep.name));
+                    let clone_status = std::process::Command::new("git")
+                        .arg("clone")
+                        .arg(&dep.source)
+                        .arg(&dep_path)
+                        .status()?;
+                    if !clone_status.success() {
+                        return Err(anyhow!("failed to clone '{}'", dep.name));
+                    }
+                } else {
+                    status(
+                        "Resetting",
+                        "load",
+                        &format!("'{}' to pinned commit...", dep.name),
+                    );
                 }
                 let reset_status = std::process::Command::new("git")
                     .args(["reset", "--hard", dep.commit.as_str()])
@@ -276,7 +418,12 @@ pub(crate) fn cmd_sync() -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) -> Result<()> {
+pub(crate) fn cmd_get(
+    source: String,
+    name: Option<String>,
+    platform: String,
+    commit: Option<String>,
+) -> Result<()> {
     let looks_local = source.starts_with('/')
         || source.starts_with("./")
         || source.starts_with("../")
@@ -307,7 +454,7 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
             "bitbucket" => "https://bitbucket.org",
             "gitea" => {
                 return Err(anyhow!(
-                    "'gitea' has no single public instance, use a full URL instead, e.g. https://your-gitea.com/{source}"
+                    "'gitea' has no single public instance, use a full URL instead, e.g. https://your-gitea.com/{{source}}"
                 ));
             }
             "savannah" => "https://git.savannah.gnu.org/git",
@@ -355,15 +502,31 @@ pub(crate) fn cmd_get(source: String, name: Option<String>, platform: String) ->
         return Err(anyhow!("git clone failed"));
     }
 
-    let output = std::process::Command::new("git")
-        .arg("rev-parse")
-        .arg("HEAD")
-        .current_dir(&dep_path)
-        .output()?;
-    let commit = String::from_utf8(output.stdout)
-        .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
-        .trim()
-        .to_string();
+    let commit = match commit {
+        Some(c) => {
+            let checkout_status = std::process::Command::new("git")
+                .args(["checkout", c.as_str()])
+                .current_dir(&dep_path)
+                .status()?;
+            if !checkout_status.success() {
+                return Err(anyhow!(
+                    "failed to checkout commit '{c}'. maybe it was a typo?"
+                ));
+            }
+            c
+        }
+        None => {
+            let output = std::process::Command::new("git")
+                .arg("rev-parse")
+                .arg("HEAD")
+                .current_dir(&dep_path)
+                .output()?;
+            String::from_utf8(output.stdout)
+                .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
+                .trim()
+                .to_string()
+        }
+    };
 
     lockfile.dep.push(Dep {
         name: name.clone(),
