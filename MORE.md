@@ -5,8 +5,8 @@
 | **Windows**             | x86_64/AMD64  | :white_check_mark: Supported  |
 |                         | i686 (32-bit) | :white_check_mark: Supported  |
 |                         | aarch64       | :soon: Maybe Soon             |
-| **macOS**               | aarch64       | :soon: Coming Soon            |
-|                         | x86_64        | :soon: Coming Soon            |
+| **macOS**               | aarch64       | :white_check_mark: Supported  |
+|                         | x86_64        | :white_check_mark: Supported  |
 | **Linux**               | x86_64        | :white_check_mark: Supported  |
 |                         | x86_64 musl   | :white_check_mark: Supported  |
 |                         | aarch64       | :white_check_mark: Supported  |
@@ -37,6 +37,6 @@
 | *Solaris*               | SPARCv9       | :x: Not Available (duh)       |
 | *Others*                | Others        | Build from source / Use Cargo |
 
-Sorry for the lack of macOS support! The next release will partly use GitHub Actions which has native macOS runners, so both targets are coming in 0.2.0 and above.
+If macOS support isn't visible in the Releases page, the GitHub runner probably failed.
 
 For Windows ARM PCs, I'm currently waiting on GitHub Actions to add runner support there. Maybe soon.

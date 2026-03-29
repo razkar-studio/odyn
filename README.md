@@ -43,6 +43,25 @@ For Odyn to function properly, the requirements are the following:
 
 Yep, that's it.
 
+### Install Script
+
+Most simple and straightforward way. 
+
+### Linux/macOS/FreeBSD/NetBSD/Android:
+```sh
+curl -fsSL https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | sh
+```
+
+or with `wget`:
+```sh
+wget -qO- https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | sh
+```
+
+### Windows (PowerShell):
+```ps1
+irm https://codeberg.org/razkar/odyn/raw/branch/main/install.ps1 | iex
+```
+
 ### Codeberg Releases
 
 By the time you're reading this, [the Codeberg repository](https://codeberg.org/razkar/odyn/releases) has probably posted a Release. Install the binary that fits your system there, and put it in your `PATH`. 

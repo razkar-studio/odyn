@@ -2,6 +2,32 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
+## [0.2.0] - Soon
+
+The More The Merrier!
+
+### Added
+
+- `odyn update-self` — now fully implemented. Detects your platform, fetches the latest release from Codeberg, verifies SHA256, and replaces the current binary. Supports all shipped platforms.
+  - SHA256 verification against `SHA256SUMS` (or `SHA256SUMS-macos` on macOS)
+  - Handles Windows quirk of not being able to overwrite a running binary
+- `odyn sync --force` — resets locally modified dependencies back to their pinned commits instead of erroring
+- `odyn sync --skip <name>` — skips a specific dependency entirely during sync. Chainable.
+- `odyn get --commit <hash>` — pin a specific commit instead of HEAD. No more touching `Odyn.lock` by hand.
+- `install.sh` — install script for Linux, macOS, FreeBSD, NetBSD, and Android. Tries `curl` first, falls back to `wget`. Verifies SHA256. Installs to `~/.local/bin`.
+- `install.ps1` — install script for Windows. Uses built-in PowerShell tools. Automatically adds to PATH.
+- SHA256SUMS and SHA256SUMS-macos files on every release
+- Forgejo Actions CI — automatic multi-platform builds on every `v*` tag
+- GitHub Actions CI — automatic macOS builds (x86_64 and aarch64) uploaded to Codeberg releases
+
+### Platform Support (up from 9 to ~25 binaries)
+
+- Linux: added aarch64 musl, i686 musl, ARMv7, ARMv7 musl, ARMv6, ARMv6 musl, POWERPC64, POWERPC64LE, s390x, SPARC64
+- Android (via Termux): aarch64, ARMv7, x86_64
+- NetBSD: x86_64
+- macOS: x86_64 (Intel), aarch64 (Apple Silicon)
+
+
 ## [0.1.0] - 2026-03-27
 
 Initial release!
