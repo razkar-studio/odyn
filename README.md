@@ -17,7 +17,7 @@ Odyn clones Git repos into `odyn_deps/` and writes the commit hash to `Odyn.lock
 
 It has no registry, no account, nor any solver. No transitive dependencies filling everything up without you knowing.
 
-Before you ask anything or make any complaints: [FaQs](#frequently-asked-questions)!
+Before you ask anything or make any complaints: please read the [FaQs](#frequently-asked-questions)!
 
 ## Quick Start
 

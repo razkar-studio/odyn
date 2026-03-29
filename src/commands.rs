@@ -15,6 +15,32 @@ use anyhow::{Result, anyhow};
 use farben::ceprintln;
 use sha2::{Digest, Sha256};
 
+fn short(commit: &str) -> &str {
+    let end = commit
+        .char_indices()
+        .nth(7)
+        .map(|(i, _)| i)
+        .unwrap_or(commit.len());
+    &commit[..end]
+}
+
+fn git_head(dep_path: &PathBuf) -> Result<String> {
+    let output = std::process::Command::new("git")
+        .args(["rev-parse", "HEAD"])
+        .current_dir(dep_path)
+        .output()?;
+    if !output.status.success() {
+        return Err(anyhow!(
+            "git rev-parse HEAD failed in '{}'",
+            dep_path.display()
+        ));
+    }
+    Ok(String::from_utf8(output.stdout)
+        .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
+        .trim()
+        .to_string())
+}
+
 pub(crate) fn cmd_init(
     project_name: String,
     license: String,
@@ -22,6 +48,7 @@ pub(crate) fn cmd_init(
     no_src: bool,
 ) -> Result<()> {
     let root: PathBuf = PathBuf::from(&project_name);
+
     if root.exists() {
         return Err(anyhow!("directory '{project_name}' already exists"));
     }
@@ -70,25 +97,19 @@ pub(crate) fn cmd_update_self() -> Result<()> {
         ("linux", "aarch64") => "odyn-linux-aarch64",
         ("linux", "x86") => "odyn-linux-i686",
         ("linux", "riscv64") => "odyn-linux-riscv64",
-        ("linux", "arm") => "odyn-linux-armv7", // defaults to armv7, armv6 users install manually
-        ("linux", "powerpc64") => "odyn-linux-powerpc64le", // defaults to LE, modern POWER
+        ("linux", "arm") => "odyn-linux-armv7",
+        ("linux", "powerpc64") => "odyn-linux-powerpc64le",
         ("linux", "s390x") => "odyn-linux-s390x",
         ("linux", "sparc64") => "odyn-linux-sparc64",
-        // MIPS: all variants failed, build from source
-        // musl: can't detect at runtime, install manually from Releases
         ("windows", "x86_64") => "odyn-windows-x86_64.exe",
         ("windows", "x86") => "odyn-windows-i686.exe",
-
         ("macos", "x86_64") => "odyn-macos-x86_64",
         ("macos", "aarch64") => "odyn-macos-aarch64",
-
         ("android", "x86_64") => "odyn-android-x86_64",
         ("android", "aarch64") => "odyn-android-aarch64",
         ("android", "arm") => "odyn-android-armv7",
-
         ("freebsd", "x86_64") => "odyn-freebsd-x86_64",
         ("freebsd", "x86") => "odyn-freebsd-i686",
-
         ("netbsd", "x86_64") => "odyn-netbsd-x86_64",
         _ => {
             return Err(anyhow!(
@@ -104,8 +125,9 @@ pub(crate) fn cmd_update_self() -> Result<()> {
         .read_to_string()?;
 
     let latest = body
-        .split("\"tag_name\":\"")
+        .split("\"tag_name\":")
         .nth(1)
+        .and_then(|s| s.trim_start_matches([' ', '\t']).strip_prefix('"'))
         .and_then(|s| s.split('"').next())
         .ok_or_else(|| anyhow!("could not parse release info from Codeberg API"))?
         .trim_start_matches('v');
@@ -115,6 +137,17 @@ pub(crate) fn cmd_update_self() -> Result<()> {
             "UpToDate",
             "success",
             &format!("already on latest version ({VERSION})"),
+        );
+        return Ok(());
+    }
+
+    if VERSION > latest {
+        status(
+            "Newer",
+            "warn",
+            &format!(
+                "local version ({VERSION}) is newer than latest release ({latest}). skipping."
+            ),
         );
         return Ok(());
     }
@@ -134,10 +167,11 @@ pub(crate) fn cmd_update_self() -> Result<()> {
 
     let mut temp_file = std::fs::File::create(&temp_path)?;
     std::io::copy(&mut response.into_body().as_reader(), &mut temp_file)?;
+    drop(temp_file);
 
     let metadata = std::fs::metadata(&temp_path)?;
     if metadata.len() == 0 {
-        std::fs::remove_file(&temp_path)?;
+        std::fs::remove_file(&temp_path).ok();
         return Err(anyhow!("downloaded file is empty, aborting update"));
     }
 
@@ -167,8 +201,9 @@ pub(crate) fn cmd_update_self() -> Result<()> {
         .iter()
         .map(|b| format!("{:02x}", b))
         .collect::<String>();
+
     if actual != expected {
-        std::fs::remove_file(&temp_path)?;
+        std::fs::remove_file(&temp_path).ok();
         return Err(anyhow!(
             "SHA256 mismatch! expected {expected}, got {actual}. aborting update."
         ));
@@ -184,15 +219,32 @@ pub(crate) fn cmd_update_self() -> Result<()> {
     let current_exe = std::env::current_exe()?;
 
     #[cfg(target_os = "windows")]
-    std::fs::rename(&current_exe, current_exe.with_extension("exe.old"))?;
+    {
+        let old_path = current_exe.with_extension("exe.old");
+        if let Err(e) = std::fs::rename(&current_exe, &old_path) {
+            std::fs::remove_file(&temp_path).ok();
+            return Err(anyhow!("failed to rename current binary: {e}"));
+        }
+        if let Err(e) = std::fs::copy(&temp_path, &current_exe) {
+            std::fs::rename(&old_path, &current_exe).ok();
+            std::fs::remove_file(&temp_path).ok();
+            return Err(anyhow!("failed to install new binary: {e}"));
+        }
+        std::fs::remove_file(&temp_path).ok();
+        std::fs::remove_file(&old_path).ok();
+    }
 
-    std::fs::rename(&temp_path, &current_exe)?;
+    #[cfg(not(target_os = "windows"))]
+    {
+        if let Err(e) = std::fs::copy(&temp_path, &current_exe) {
+            std::fs::remove_file(&temp_path).ok();
+            return Err(anyhow!("failed to install new binary: {e}"));
+        }
+        std::fs::remove_file(&temp_path).ok();
+    }
 
     status("Updated", "success", &format!("odyn updated to v{latest}"));
     status("Info", "info", "restart odyn for changes to take effect");
-
-    #[cfg(target_os = "windows")]
-    std::fs::remove_file(current_exe.with_extension("exe.old")).ok();
 
     Ok(())
 }
@@ -202,8 +254,12 @@ pub(crate) fn cmd_remove(name: String) -> Result<()> {
     if !lockfile.dep.iter().any(|dep| dep.name == name) {
         return Err(anyhow!("dependency '{name}' not found in Odyn.lock"));
     }
-    std::fs::remove_dir_all(PathBuf::from(DEPS_DIR).join(&name))?;
+
+    let dep_path = PathBuf::from(DEPS_DIR).join(&name);
+    std::fs::remove_dir_all(&dep_path)?;
+
     lockfile.dep.retain(|d| d.name != name);
+
     save_lockfile(&lockfile)?;
     Ok(())
 }
@@ -227,21 +283,14 @@ pub(crate) fn cmd_update(name: String) -> Result<()> {
     }
 
     let reset_status = std::process::Command::new("git")
-        .args(["reset", "--hard", "--quiet", "origin/HEAD"])
+        .args(["reset", "--hard", "--quiet", "FETCH_HEAD"])
         .current_dir(&dep_path)
         .status()?;
     if !reset_status.success() {
-        return Err(anyhow!("failed to reset '{name}' to origin/HEAD"));
+        return Err(anyhow!("failed to reset '{name}' to latest commit"));
     }
 
-    let output = std::process::Command::new("git")
-        .args(["rev-parse", "HEAD"])
-        .current_dir(&dep_path)
-        .output()?;
-    let commit = String::from_utf8(output.stdout)
-        .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
-        .trim()
-        .to_string();
+    let commit = git_head(&dep_path)?;
 
     if let Some(dep) = lockfile.dep.iter_mut().find(|d| d.name == name) {
         dep.commit = commit.clone();
@@ -251,7 +300,7 @@ pub(crate) fn cmd_update(name: String) -> Result<()> {
     status(
         "Updated",
         "success",
-        &format!("'{name}' → {}", &commit[..7]),
+        &format!("'{name}' → {}", short(&commit)),
     );
     Ok(())
 }
@@ -276,20 +325,20 @@ pub(crate) fn cmd_status() -> Result<()> {
             continue;
         }
 
-        let output = std::process::Command::new("git")
-            .args(["rev-parse", "HEAD"])
-            .current_dir(&dep_path)
-            .output()?;
-        let commit = String::from_utf8(output.stdout)
-            .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
-            .trim()
-            .to_string();
+        let commit = match git_head(&dep_path) {
+            Ok(c) => c,
+            Err(e) => {
+                status("Error", "error", &format!("'{}': {e}", dep.name));
+                any_bad = true;
+                continue;
+            }
+        };
 
         if commit == dep.commit {
             status(
                 "Ok",
                 "success",
-                &format!("'{}' at {}", dep.name, &dep.commit[..7]),
+                &format!("'{}' at {}", dep.name, short(&dep.commit)),
             );
         } else {
             status(
@@ -298,8 +347,8 @@ pub(crate) fn cmd_status() -> Result<()> {
                 &format!(
                     "'{}': expected '{}' but found '{}'",
                     dep.name,
-                    &dep.commit[..7],
-                    &commit[..7]
+                    short(&dep.commit),
+                    short(&commit),
                 ),
             );
             any_bad = true;
@@ -323,29 +372,27 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
     }
 
     let mut result: Vec<(&Dep, DepState)> = Vec::new();
+    let mut any_skipped = false;
+
     for dep in &lockfile.dep {
         if skip.contains(&dep.name) {
+            any_skipped = true;
             continue;
         }
         let dep_path: PathBuf = PathBuf::from(DEPS_DIR).join(&dep.name);
         if dep_path.exists() {
-            let output = std::process::Command::new("git")
-                .arg("rev-parse")
-                .arg("HEAD")
-                .current_dir(dep_path)
-                .output()?;
-            let commit = String::from_utf8(output.stdout)
-                .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
-                .trim()
-                .to_string();
+            let commit = match git_head(&dep_path) {
+                Ok(c) => c,
+                Err(e) => {
+                    return Err(anyhow!("failed to read commit for '{}': {e}", dep.name));
+                }
+            };
             if commit == dep.commit {
                 result.push((dep, DepState::Ok))
+            } else if force {
+                result.push((dep, DepState::Missing))
             } else {
-                if force {
-                    result.push((dep, DepState::Missing))
-                } else {
-                    result.push((dep, DepState::Modified { actual: commit }))
-                }
+                result.push((dep, DepState::Modified { actual: commit }))
             }
         } else {
             result.push((dep, DepState::Missing));
@@ -369,11 +416,11 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
             ceprintln!(
                 "[error]       Error[/] '{}': expected '{}' but found '{}'",
                 dep.name,
-                &dep.commit[..7],
-                &actual[..7]
+                short(&dep.commit),
+                short(actual)
             );
         }
-        status("Hint", "info", "revert local changes to run sync");
+        status("Hint", "info", "revert local changes or use --force");
         return Err(anyhow!("sync failed: modified dependencies found"));
     }
 
@@ -392,6 +439,18 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
                         return Err(anyhow!("failed to clone '{}'", dep.name));
                     }
                 } else {
+                    status(
+                        "Fetching",
+                        "load",
+                        &format!("'{}' before reset...", dep.name),
+                    );
+                    let fetch_status = std::process::Command::new("git")
+                        .args(["fetch", "origin", "--quiet"])
+                        .current_dir(&dep_path)
+                        .status()?;
+                    if !fetch_status.success() {
+                        return Err(anyhow!("failed to fetch '{}' before reset", dep.name));
+                    }
                     status(
                         "Resetting",
                         "load",
@@ -414,7 +473,16 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
         }
     }
 
-    status("Finished", "success", "all dependencies up to date");
+    if any_skipped {
+        status(
+            "Finished",
+            "success",
+            "sync complete (some dependencies were skipped)",
+        );
+    } else {
+        status("Finished", "success", "all dependencies up to date");
+    }
+
     Ok(())
 }
 
@@ -472,14 +540,25 @@ pub(crate) fn cmd_get(
         source
     };
 
-    let name: String = name.unwrap_or_else(|| {
+    let raw_name = name.unwrap_or_else(|| {
         source
+            .trim_end_matches('/')
             .split('/')
             .next_back()
             .unwrap_or("unknown")
             .to_string()
     });
-    let name: String = name.strip_suffix(".git").unwrap_or(&name).to_string();
+
+    if raw_name.is_empty() {
+        return Err(anyhow!(
+            "could not derive a name from '{source}'. pass one explicitly: odyn get <source> <name>"
+        ));
+    }
+
+    let name: String = raw_name
+        .strip_suffix(".git")
+        .unwrap_or(&raw_name)
+        .to_string();
 
     check_git()?;
     let mut lockfile: Lockfile = load_lockfile()?;
@@ -509,23 +588,20 @@ pub(crate) fn cmd_get(
                 .current_dir(&dep_path)
                 .status()?;
             if !checkout_status.success() {
+                std::fs::remove_dir_all(&dep_path).ok();
                 return Err(anyhow!(
-                    "failed to checkout commit '{c}'. maybe it was a typo?"
+                    "failed to checkout commit '{c}'. maybe it was a typo? (partial clone removed)"
                 ));
             }
             c
         }
-        None => {
-            let output = std::process::Command::new("git")
-                .arg("rev-parse")
-                .arg("HEAD")
-                .current_dir(&dep_path)
-                .output()?;
-            String::from_utf8(output.stdout)
-                .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
-                .trim()
-                .to_string()
-        }
+        None => match git_head(&dep_path) {
+            Ok(c) => c,
+            Err(e) => {
+                std::fs::remove_dir_all(&dep_path).ok();
+                return Err(anyhow!("failed to read HEAD commit: {e}"));
+            }
+        },
     };
 
     lockfile.dep.push(Dep {
@@ -534,6 +610,13 @@ pub(crate) fn cmd_get(
         commit,
     });
 
-    save_lockfile(&lockfile)?;
+    // Bug 12: clean up cloned directory if lockfile save fails
+    if let Err(e) = save_lockfile(&lockfile) {
+        std::fs::remove_dir_all(&dep_path).ok();
+        return Err(anyhow!(
+            "failed to save lockfile (partial clone removed): {e}"
+        ));
+    }
+
     Ok(())
 }
