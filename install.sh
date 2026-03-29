@@ -3,7 +3,7 @@
 # Installs the latest release of Odyn to ~/.local/bin
 # https://codeberg.org/razkar/odyn
 
-set -e
+set -eu
 
 REPO="razkar/odyn"
 INSTALL_DIR="$HOME/.local/bin"
@@ -19,6 +19,14 @@ info()    { printf "${BLUE}    install${RESET} %s\n" "$1"; }
 success() { printf "${GREEN}    install${RESET} %s\n" "$1"; }
 warn()    { printf "${YELLOW}       warn${RESET} %s\n" "$1"; }
 error()   { printf "${RED}      error${RESET} %s\n" "$1"; exit 1; }
+
+tmp_dir=""
+cleanup() {
+    if [ -n "$tmp_dir" ] && [ -d "$tmp_dir" ]; then
+        rm -rf "$tmp_dir"
+    fi
+}
+trap cleanup EXIT
 
 if command -v curl > /dev/null 2>&1; then
     DOWNLOADER="curl"
@@ -53,9 +61,12 @@ case "$os" in
     Darwin)  os="macos" ;;
     FreeBSD) os="freebsd" ;;
     NetBSD)  os="netbsd" ;;
-    Android) os="android" ;;
     *)       error "unsupported operating system: $os" ;;
 esac
+
+if [ "$os" = "linux" ] && [ -n "${ANDROID_ROOT:-}" ]; then
+    os="android"
+fi
 
 arch="$(uname -m)"
 case "$arch" in
@@ -96,7 +107,7 @@ esac
 
 info "fetching latest version..."
 api_response="$(download_string "https://codeberg.org/api/v1/repos/${REPO}/releases/latest")"
-version="$(echo "$api_response" | grep -o '"tag_name":"[^"]*"' | grep -o 'v[^"]*')"
+version="$(printf '%s' "$api_response" | grep -o '"tag_name":"[^"]*"' | grep -o ':[^}]*' | tr -d ':"')"
 
 if [ -z "$version" ]; then
     error "could not determine latest version from Codeberg API"
@@ -125,7 +136,7 @@ fi
 
 info "verifying checksum..."
 sums="$(download_string "$sums_url")"
-expected="$(echo "$sums" | grep "$binary" | awk '{print $1}')"
+expected="$(printf '%s' "$sums" | grep -F " ${binary}" | awk '{print $1}')"
 
 if [ -z "$expected" ]; then
     error "could not find checksum for $binary in SHA256SUMS"
@@ -141,7 +152,6 @@ else
 fi
 
 if [ "$actual" != "$expected" ]; then
-    rm -rf "$tmp_dir"
     error "SHA256 mismatch! expected $expected, got $actual. aborting."
 fi
 
@@ -150,7 +160,6 @@ success "checksum verified"
 mkdir -p "$INSTALL_DIR"
 chmod +x "$tmp_binary"
 mv "$tmp_binary" "${INSTALL_DIR}/${BINARY_NAME}"
-rm -rf "$tmp_dir"
 
 success "odyn $version installed to ${INSTALL_DIR}/${BINARY_NAME}"
 

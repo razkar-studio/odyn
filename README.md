@@ -45,9 +45,9 @@ Yep, that's it.
 
 ### Install Script
 
-Most simple and straightforward way. 
+Most simple and straightforward way.
 
-### Linux/macOS/FreeBSD/NetBSD/Android:
+**Linux/macOS/FreeBSD/NetBSD/Android:**
 ```sh
 curl -fsSL https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | sh
 ```
@@ -57,25 +57,31 @@ or with `wget`:
 wget -qO- https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | sh
 ```
 
-### Windows (PowerShell):
+**Windows (PowerShell):**
 ```ps1
 irm https://codeberg.org/razkar/odyn/raw/branch/main/install.ps1 | iex
 ```
 
+> [!NOTE]
+> On Windows, you may need to allow script execution first:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+
 ### Codeberg Releases
 
-By the time you're reading this, [the Codeberg repository](https://codeberg.org/razkar/odyn/releases) has probably posted a Release. Install the binary that fits your system there, and put it in your `PATH`. 
-Odyn has pre-built binaries for Windows, macOS, Linux, Android (via Termux), FreeBSD, and NetBSD. The full architecture table can be found in the [MORE.md](./MORE.md) file in the repository.
+[The Codeberg repository](https://codeberg.org/razkar/odyn/releases) has pre-built binaries for Windows, macOS, Linux, Android (via Termux), FreeBSD, and NetBSD. Install the binary that fits your system and put it in your `PATH`.
+
+The full architecture table can be found in [MORE.md](./MORE.md).
 
 > [!IMPORTANT]
-> Some of these "supported platforms" may not support `update-self`. For that, you'd have to install the binaries manually
-> on the Releases page. Examples may be: every musl variant, powerpc64 (defaults to le), ARMv6 (defaults to ARMv7).
-> "defaulting" is dangerous if your system does not support it. Always prefer installing from Releases if your system is not `update-self` supported.
+> Some platforms may not support `update-self`. For those, install binaries manually from the Releases page.
+> Examples: every musl variant, powerpc64 (defaults to LE), ARMv6 (defaults to ARMv7).
+> Always prefer installing from Releases if your system is not `update-self` supported.
 
 > [!NOTE]
-> If you're on Windows but unsure, download `x86_64` (or check your system). Apple Silicon (M1/M2/M3 and friends) download `aarch64`,
-> Mac Intel users download `x86_64`. If you're on Linux, you probably know which architecture you have, just note that it supports
-> all distros.
+> If you're on Windows but unsure, download `x86_64`. Apple Silicon (M1/M2/M3) users download `aarch64`,
+> Intel Mac users download `x86_64`. On Linux, you probably know your architecture, just note it works on all distros.
 
 ### Build From Source
 
@@ -89,39 +95,31 @@ cargo build --release
 
 Binary lands at `target/release/odyn`. Put it on your `PATH`.
 
-Prebuilt binaries are now available in the Releases tab. Refer [here](#codeberg-releases).
-
 ### Using Cargo
-
-Cargo is the official build system and package manager for the Rust programming language.
-Since Odyn is available at [crates.io](https://crates.io), the central package registry, 
-you can simply run the following command if you have Rust installed with `cargo`.
 
 ```sh
 cargo install odyn
 ```
 
-Put the result in your `PATH`
-
 ## Commands
 
-Commands marked :white_check_mark: are complete and stable.
+Commands marked ✅ are complete and stable.
 
 | Command | Description |
 |---|---|
-| :white_check_mark: `odyn init <name>` | New Odin project with `src/`, `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` |
-| :white_check_mark: `odyn get <source> [name]` | Clone a dependency and pin its commit. Accepts `user/repo` shorthand or a full URL |
-| :white_check_mark: `odyn sync` | Make `odyn_deps/` match `Odyn.lock`. Re-clones missing deps, errors on modified ones |
-| :white_check_mark: `odyn status` | Report every dependency as ok, missing, or modified. Exits non-zero if anything is wrong |
-| :white_check_mark: `odyn update <name>` | Pull the latest commit for a dependency and re-pin it |
-| :white_check_mark: `odyn remove <name>` | Delete the folder and remove the entry from `Odyn.lock` |
-| `odyn update-self` | Update Odyn itself *(coming soon)* |
+| ✅ `odyn init <n>` | New Odin project with `src/`, `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` |
+| ✅ `odyn get <source> [name]` | Clone a dependency and pin its commit. Accepts `user/repo` shorthand or a full URL |
+| ✅ `odyn sync` | Make `odyn_deps/` match `Odyn.lock`. Re-clones missing deps, errors on modified ones |
+| ✅ `odyn status` | Report every dependency as ok, missing, or modified. Exits non-zero if anything is wrong |
+| ✅ `odyn update <n>` | Pull the latest commit for a dependency and re-pin it |
+| ✅ `odyn remove <n>` | Delete the folder and remove the entry from `Odyn.lock` |
+| ✅ `odyn update-self` | Update Odyn itself to the latest release |
 
 ### `odyn init` flags
 
 | Flag | Description |
 |---|---|
-| `--license <type>` | License file to generate. Defaults to `mit`, also accepts `apache`, `gpl3`, `bsd2`, `bsd3`, `mpl2`, `unlicense`, `zlib`, and `isc` |
+| `--license <type>` | License file to generate. Defaults to `mit`. Also accepts `apache`, `gpl3`, `bsd2`, `bsd3`, `mpl2`, `unlicense`, `zlib`, `isc` |
 | `--with-readme` | Add a `README.md` stub |
 | `--no-src` | Skip the `src/` directory |
 
@@ -129,7 +127,15 @@ Commands marked :white_check_mark: are complete and stable.
 
 | Flag | Description |
 |---|---|
-| `--platform <name>` | Platform to resolve `user/repo` against. Defaults to `github`. Supports `github`, `codeberg`, `gitlab`, `sourcehut`, `bitbucket`, `framagit`, `disroot`, `notabug`, and `savannah` |
+| `--platform <n>` | Platform to resolve `user/repo` against. Defaults to `github`. Supports `github`, `codeberg`, `gitlab`, `sourcehut`, `bitbucket`, `framagit`, `disroot`, `notabug`, `savannah` |
+| `--commit <hash>` | Pin a specific commit instead of HEAD |
+
+### `odyn sync` flags
+
+| Flag | Description |
+|---|---|
+| `--force` | Reset locally modified dependencies to their pinned commits instead of erroring |
+| `--skip <n>` | Skip a specific dependency entirely. Chainable |
 
 ## The Lockfile
 
@@ -182,7 +188,7 @@ Which is **exactly** what Odyn automates, and nothing more.
 Odyn is a *reproducible vendoring tool* for the Odin programming language. Not a package manager.
 
 ### Q. Why Not Git Submodules?
-Because git submodules are famously unpleasant to work with, and the happy path is a lie. 
+Because git submodules are famously unpleasant to work with, and the happy path is a lie.
 The happy path looks simple, but the moment you step off the happy path, submodules start biting you. A few real scenarios:
 
 * Someone clones your repo without `--recurse-submodules`: they get empty directories and no obvious error message. This happens constantly to people who don't know or forget the flag.
