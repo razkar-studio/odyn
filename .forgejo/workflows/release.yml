@@ -14,7 +14,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add x86_64-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add x86_64-unknown-linux-gnu
       - name: Build
         run: cargo build --release --target x86_64-unknown-linux-gnu
       - name: Strip
@@ -35,7 +36,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add x86_64-unknown-linux-musl
+      - name: Add target
+        run: rustup target add x86_64-unknown-linux-musl
       - name: Install musl tools
         run: sudo apt-get install -y musl-tools
       - name: Build
@@ -58,7 +60,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add aarch64-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add aarch64-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -81,7 +84,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add i686-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add i686-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -104,7 +108,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add riscv64gc-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add riscv64gc-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -127,7 +132,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add aarch64-unknown-linux-musl
+      - name: Add target
+        run: rustup target add aarch64-unknown-linux-musl
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -150,7 +156,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add i686-unknown-linux-musl
+      - name: Add target
+        run: rustup target add i686-unknown-linux-musl
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -173,7 +180,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add armv7-unknown-linux-gnueabihf
+      - name: Add target
+        run: rustup target add armv7-unknown-linux-gnueabihf
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -196,7 +204,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add armv7-unknown-linux-musleabihf
+      - name: Add target
+        run: rustup target add armv7-unknown-linux-musleabihf
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -219,7 +228,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add arm-unknown-linux-gnueabihf
+      - name: Add target
+        run: rustup target add arm-unknown-linux-gnueabihf
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -242,7 +252,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add arm-unknown-linux-musleabihf
+      - name: Add target
+        run: rustup target add arm-unknown-linux-musleabihf
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -265,7 +276,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add powerpc64-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add powerpc64-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -288,7 +300,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add powerpc64le-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add powerpc64le-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -311,7 +324,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add s390x-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add s390x-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -334,7 +348,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add sparc64-unknown-linux-gnu
+      - name: Add target
+        run: rustup target add sparc64-unknown-linux-gnu
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -357,7 +372,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add x86_64-unknown-netbsd
+      - name: Add target
+        run: rustup target add x86_64-unknown-netbsd
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -380,7 +396,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add aarch64-linux-android
+      - name: Add target
+        run: rustup target add aarch64-linux-android
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -403,7 +420,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add armv7-linux-androideabi
+      - name: Add target
+        run: rustup target add armv7-linux-androideabi
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -426,7 +444,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add x86_64-linux-android
+      - name: Add target
+        run: rustup target add x86_64-linux-android
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -449,7 +468,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add x86_64-pc-windows-gnu
+      - name: Add target
+        run: rustup target add x86_64-pc-windows-gnu
       - name: Install mingw
         run: sudo apt-get install -y gcc-mingw-w64-x86-64
       - name: Build
@@ -470,7 +490,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add i686-pc-windows-gnu
+      - name: Add target
+        run: rustup target add i686-pc-windows-gnu
       - name: Install mingw
         run: sudo apt-get install -y gcc-mingw-w64-i686
       - name: Build
@@ -491,7 +512,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add x86_64-unknown-freebsd
+      - name: Add target
+        run: rustup target add x86_64-unknown-freebsd
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
@@ -514,7 +536,8 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          rustup target add i686-unknown-freebsd
+      - name: Add target
+        run: rustup target add i686-unknown-freebsd
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build
