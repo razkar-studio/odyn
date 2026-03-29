@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: x86_64-unknown-linux-gnu
@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: x86_64-unknown-linux-musl
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: aarch64-unknown-linux-gnu
@@ -78,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: i686-unknown-linux-gnu
@@ -101,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: riscv64gc-unknown-linux-gnu
@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: aarch64-unknown-linux-musl
@@ -147,7 +147,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: i686-unknown-linux-musl
@@ -170,7 +170,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: armv7-unknown-linux-gnueabihf
@@ -193,7 +193,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: armv7-unknown-linux-musleabihf
@@ -216,7 +216,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: arm-unknown-linux-gnueabihf
@@ -239,7 +239,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: arm-unknown-linux-musleabihf
@@ -262,7 +262,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: powerpc64-unknown-linux-gnu
@@ -285,7 +285,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: powerpc64le-unknown-linux-gnu
@@ -308,7 +308,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: s390x-unknown-linux-gnu
@@ -331,7 +331,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: sparc64-unknown-linux-gnu
@@ -354,7 +354,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: x86_64-unknown-netbsd
@@ -377,7 +377,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: aarch64-linux-android
@@ -400,7 +400,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: armv7-linux-androideabi
@@ -423,7 +423,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: x86_64-linux-android
@@ -446,7 +446,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: x86_64-pc-windows-gnu
@@ -467,7 +467,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: i686-pc-windows-gnu
@@ -488,7 +488,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: x86_64-unknown-freebsd
@@ -511,7 +511,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           target: i686-unknown-freebsd
