@@ -476,10 +476,14 @@ jobs:
 
       - name: Upload artifacts
         run: |
+          RELEASE_ID=$(curl -sf \
+            -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+
           for file in upload/*; do
             curl -X POST \
               -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary @"$file" \
-              "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=$(basename $file)"
+              -F "attachment=@${file}" \
+              "https://codeberg.org/api/v1/repos/razkar/odyn/releases/${RELEASE_ID}/assets?name=$(basename $file)"
           done
