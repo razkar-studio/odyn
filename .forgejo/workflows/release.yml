@@ -55,7 +55,7 @@ jobs:
           path: odyn-linux-x86_64-musl
 
   build-linux-aarch64:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -107,7 +107,7 @@ jobs:
           path: odyn-linux-i686
 
   build-linux-riscv64:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -133,7 +133,7 @@ jobs:
           path: odyn-linux-riscv64
 
   build-linux-aarch64-musl:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -185,7 +185,7 @@ jobs:
           path: odyn-linux-i686-musl
 
   build-linux-armv7:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -211,7 +211,7 @@ jobs:
           path: odyn-linux-armv7
 
   build-linux-armv7-musl:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -237,7 +237,7 @@ jobs:
           path: odyn-linux-armv7-musl
 
   build-linux-armv6:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -263,7 +263,7 @@ jobs:
           path: odyn-linux-armv6
 
   build-linux-armv6-musl:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -289,7 +289,7 @@ jobs:
           path: odyn-linux-armv6-musl
 
   build-linux-powerpc64:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -315,7 +315,7 @@ jobs:
           path: odyn-linux-powerpc64
 
   build-linux-powerpc64le:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -341,7 +341,7 @@ jobs:
           path: odyn-linux-powerpc64le
 
   build-linux-s390x:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -367,7 +367,7 @@ jobs:
           path: odyn-linux-s390x
 
   build-linux-sparc64:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -477,5 +477,7 @@ jobs:
         with:
           direction: upload
           tag: ${{ github.ref_name }}
-          release-dir: .
+          release-dir: upload/
           token: ${{ secrets.RELEASE_TOKEN }}
+          repo: razkar/odyn
+          server-url: https://codeberg.org
