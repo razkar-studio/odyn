@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-linux-x86_64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -29,7 +29,7 @@ jobs:
           path: odyn-linux-x86_64
 
   build-linux-x86_64-musl:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -53,7 +53,7 @@ jobs:
           path: odyn-linux-x86_64-musl
 
   build-linux-aarch64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -77,7 +77,7 @@ jobs:
           path: odyn-linux-aarch64
 
   build-linux-i686:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -101,7 +101,7 @@ jobs:
           path: odyn-linux-i686
 
   build-linux-riscv64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -125,7 +125,7 @@ jobs:
           path: odyn-linux-riscv64
 
   build-linux-aarch64-musl:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -149,7 +149,7 @@ jobs:
           path: odyn-linux-aarch64-musl
 
   build-linux-i686-musl:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -173,7 +173,7 @@ jobs:
           path: odyn-linux-i686-musl
 
   build-linux-armv7:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -197,7 +197,7 @@ jobs:
           path: odyn-linux-armv7
 
   build-linux-armv7-musl:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -221,7 +221,7 @@ jobs:
           path: odyn-linux-armv7-musl
 
   build-linux-armv6:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -245,7 +245,7 @@ jobs:
           path: odyn-linux-armv6
 
   build-linux-armv6-musl:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -269,7 +269,7 @@ jobs:
           path: odyn-linux-armv6-musl
 
   build-linux-powerpc64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -293,7 +293,7 @@ jobs:
           path: odyn-linux-powerpc64
 
   build-linux-powerpc64le:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -317,7 +317,7 @@ jobs:
           path: odyn-linux-powerpc64le
 
   build-linux-s390x:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -341,7 +341,7 @@ jobs:
           path: odyn-linux-s390x
 
   build-linux-sparc64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -365,7 +365,7 @@ jobs:
           path: odyn-linux-sparc64
 
   build-netbsd-x86_64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -389,7 +389,7 @@ jobs:
           path: odyn-netbsd-x86_64
 
   build-android-aarch64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -413,7 +413,7 @@ jobs:
           path: odyn-android-aarch64
 
   build-android-armv7:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -437,7 +437,7 @@ jobs:
           path: odyn-android-armv7
 
   build-android-x86_64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -461,7 +461,7 @@ jobs:
           path: odyn-android-x86_64
 
   build-windows-x86_64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -483,7 +483,7 @@ jobs:
           path: odyn-windows-x86_64.exe
 
   build-windows-i686:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -505,7 +505,7 @@ jobs:
           path: odyn-windows-i686.exe
 
   build-freebsd-x86_64:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -529,7 +529,7 @@ jobs:
           path: odyn-freebsd-x86_64
 
   build-freebsd-i686:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -577,7 +577,7 @@ jobs:
       - build-android-aarch64
       - build-android-armv7
       - build-android-x86_64
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
