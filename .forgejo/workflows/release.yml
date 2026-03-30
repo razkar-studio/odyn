@@ -440,47 +440,46 @@ jobs:
           name: odyn-windows-i686
           path: odyn-windows-i686.exe
 
-  release:
-    needs:
-      - build-linux-x86_64
-      - build-linux-x86_64-musl
-      - build-linux-aarch64
-      - build-linux-aarch64-musl
-      - build-linux-i686
-      - build-linux-i686-musl
-      - build-linux-riscv64
-      - build-linux-armv7
-      - build-linux-armv7-musl
-      - build-linux-armv6
-      - build-linux-armv6-musl
-      - build-linux-powerpc64
-      - build-linux-powerpc64le
-      - build-linux-s390x
-      - build-linux-sparc64
-      - build-windows-x86_64
-      - build-windows-i686
-    runs-on: codeberg-tiny
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: dist/
+release:
+  needs:
+    - build-linux-x86_64
+    - build-linux-x86_64-musl
+    - build-linux-aarch64
+    - build-linux-aarch64-musl
+    - build-linux-i686
+    - build-linux-i686-musl
+    - build-linux-riscv64
+    - build-linux-armv7
+    - build-linux-armv7-musl
+    - build-linux-armv6
+    - build-linux-armv6-musl
+    - build-linux-powerpc64
+    - build-linux-powerpc64le
+    - build-linux-s390x
+    - build-linux-sparc64
+    - build-windows-x86_64
+    - build-windows-i686
+  runs-on: codeberg-tiny
+  steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: dist/
 
-      - name: Flatten artifacts
-        run: |
-          mkdir -p upload
-          find dist/ -type f -exec mv {} upload/ \;
+    - name: Flatten artifacts
+      run: |
+        mkdir -p upload
+        find dist/ -type f -exec mv {} upload/ \;
 
-      - name: Generate SHA256SUMS
-        run: cd upload && sha256sum odyn-* > SHA256SUMS
+    - name: Generate SHA256SUMS
+      run: cd upload && sha256sum odyn-* > SHA256SUMS
 
-      - name: Create release
-        uses: actions/forgejo-release@v2
-        with:
-          direction: upload
-          tag: ${{ github.ref_name }}
-          release-dir: upload/
-          release-exists: true
-          repo: razkar/odyn
-          server-url: https://codeberg.org
-          token: ${{ secrets.RELEASE_TOKEN }}
+    - name: Upload artifacts
+      run: |
+        for file in upload/*; do
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"$file" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=$(basename $file)"
+        done
