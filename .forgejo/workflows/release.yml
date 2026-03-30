@@ -459,7 +459,7 @@ jobs:
       - build-linux-sparc64
       - build-windows-x86_64
       - build-windows-i686
-    runs-on: codeberg-small
+    runs-on: codeberg-tiny
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
@@ -467,10 +467,12 @@ jobs:
           path: dist/
 
       - name: Flatten artifacts
-        run: find dist/ -type f -exec mv {} . \;
+        run: |
+          mkdir -p upload
+          find dist/ -type f -exec mv {} upload/ \;
 
       - name: Generate SHA256SUMS
-        run: sha256sum odyn-* > SHA256SUMS
+        run: cd upload && sha256sum odyn-* > SHA256SUMS
 
       - name: Create release
         uses: actions/forgejo-release@v2
@@ -478,6 +480,7 @@ jobs:
           direction: upload
           tag: ${{ github.ref_name }}
           release-dir: upload/
-          token: ${{ secrets.RELEASE_TOKEN }}
+          release-exists: true
           repo: razkar/odyn
           server-url: https://codeberg.org
+          token: ${{ secrets.RELEASE_TOKEN }}
