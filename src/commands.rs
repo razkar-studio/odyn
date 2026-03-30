@@ -175,10 +175,9 @@ pub(crate) fn cmd_update_self() -> Result<()> {
         return Err(anyhow!("downloaded file is empty, aborting update"));
     }
 
-    let sums_filename = if os == "macos" {
-        "SHA256SUMS-macos"
-    } else {
-        "SHA256SUMS"
+    let sums_filename = match os {
+        "linux" | "windows" => "SHA256SUMS",
+        _ => "SHA256SUMS-github",
     };
 
     let sums = ureq::get(&format!(

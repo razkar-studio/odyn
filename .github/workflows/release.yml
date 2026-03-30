@@ -246,25 +246,64 @@ jobs:
     needs:
       - build-macos-x86_64
       - build-macos-aarch64
+      - build-android-aarch64
+      - build-android-armv7
+      - build-android-x86_64
+      - build-netbsd-x86_64
+      - build-freebsd-x86_64
+      - build-freebsd-i686
     runs-on: ubuntu-latest
     steps:
-      - name: Download x86_64
+      - name: Download odyn-macos-x86_64
         run: |
           curl -L -o odyn-macos-x86_64 \
             "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-macos-x86_64"
 
-      - name: Download aarch64
+      - name: Download odyn-macos-aarch64
         run: |
           curl -L -o odyn-macos-aarch64 \
             "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-macos-aarch64"
 
-      - name: Generate SHA256SUMS-macos
-        run: sha256sum odyn-macos-* > SHA256SUMS-macos
-
-      - name: Upload SHA256SUMS-macos
+      - name: Download odyn-android-aarch64
         run: |
+          curl -L -o odyn-android-aarch64 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-android-aarch64"
+
+      - name: Download odyn-android-armv7
+        run: |
+          curl -L -o odyn-android-armv7 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-android-armv7"
+
+      - name: Download odyn-android-x86_64
+        run: |
+          curl -L -o odyn-android-x86_64 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-android-x86_64"
+
+      - name: Download odyn-netbsd-x86_64
+        run: |
+          curl -L -o odyn-netbsd-x86_64 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-netbsd-x86_64"
+
+      - name: Download odyn-freebsd-x86_64
+        run: |
+          curl -L -o odyn-freebsd-x86_64 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-freebsd-x86_64"
+
+      - name: Download odyn-freebsd-i686
+        run: |
+          curl -L -o odyn-freebsd-i686 \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-freebsd-i686"
+
+      - name: Generate SHA256SUMS-github
+        run: sha256sum odyn-* > SHA256SUMS-github
+
+      - name: Upload SHA256SUMS-github
+        run: |
+          RELEASE_ID=$(curl -sf \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
           curl -X POST \
             -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @SHA256SUMS-macos \
-            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=SHA256SUMS-macos"
+            -F "attachment=@SHA256SUMS-github" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/${RELEASE_ID}/assets?name=SHA256SUMS-github"
