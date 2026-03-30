@@ -118,11 +118,12 @@ info "latest version is $version"
 base_url="https://codeberg.org/${REPO}/releases/download/${version}"
 binary_url="${base_url}/${binary}"
 
-if [ "$os" = "macos" ]; then
-    sums_url="${base_url}/SHA256SUMS-macos"
-else
-    sums_url="${base_url}/SHA256SUMS"
-fi
+case "$os" in
+    macos | android | freebsd | netbsd)
+        sums_url="${base_url}/SHA256SUMS-github" ;;
+    *)
+        sums_url="${base_url}/SHA256SUMS" ;;
+esac
 
 tmp_dir="$(mktemp -d)"
 tmp_binary="${tmp_dir}/${binary}"
@@ -136,7 +137,7 @@ fi
 
 info "verifying checksum..."
 sums="$(download_string "$sums_url")"
-expected="$(printf '%s' "$sums" | grep -F " ${binary}" | awk '{print $1}')"
+expected="$(printf '%s' "$sums" | grep " ${binary}$" | awk '{print $1}')"
 
 if [ -z "$expected" ]; then
     error "could not find checksum for $binary in SHA256SUMS"

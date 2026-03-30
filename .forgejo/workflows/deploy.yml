@@ -1,0 +1,37 @@
+name: Deploy Docusaurus to Codeberg Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: https://code.forgejo.org/actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: https://code.forgejo.org/actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build site
+        working-directory: docs
+        run: npm run build
+
+      - name: Deploy to pages branch
+        uses: https://github.com/peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.CODEBERG_TOKEN }}
+          external_repository: YOUR_USERNAME/YOUR_REPO_NAME
+          publish_branch: pages
+          publish_dir: docs/build
+          force_orphan: true
