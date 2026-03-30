@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-linux-x86_64:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -29,7 +29,7 @@ jobs:
           path: odyn-linux-x86_64
 
   build-linux-x86_64-musl:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -71,7 +71,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc cargo build --release --target aarch64-unknown-linux-gnu
       - name: Strip
-        run: strip target/aarch64-unknown-linux-gnu/release/odyn
+        run: aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/aarch64-unknown-linux-gnu/release/odyn odyn-linux-aarch64
       - name: Upload
@@ -81,7 +81,7 @@ jobs:
           path: odyn-linux-aarch64
 
   build-linux-i686:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -97,7 +97,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_LINKER=i686-linux-gnu-gcc cargo build --release --target i686-unknown-linux-gnu
       - name: Strip
-        run: strip target/i686-unknown-linux-gnu/release/odyn
+        run: i686-linux-gnu-strip target/i686-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/i686-unknown-linux-gnu/release/odyn odyn-linux-i686
       - name: Upload
@@ -123,7 +123,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc cargo build --release --target riscv64gc-unknown-linux-gnu
       - name: Strip
-        run: strip target/riscv64gc-unknown-linux-gnu/release/odyn
+        run: riscv64-linux-gnu-strip target/riscv64gc-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/riscv64gc-unknown-linux-gnu/release/odyn odyn-linux-riscv64
       - name: Upload
@@ -149,7 +149,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc cargo build --release --target aarch64-unknown-linux-musl
       - name: Strip
-        run: strip target/aarch64-unknown-linux-musl/release/odyn
+        run: aarch64-linux-gnu-strip target/aarch64-unknown-linux-musl/release/odyn
       - name: Rename
         run: cp target/aarch64-unknown-linux-musl/release/odyn odyn-linux-aarch64-musl
       - name: Upload
@@ -159,7 +159,7 @@ jobs:
           path: odyn-linux-aarch64-musl
 
   build-linux-i686-musl:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -175,7 +175,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_I686_UNKNOWN_LINUX_MUSL_LINKER=i686-linux-gnu-gcc cargo build --release --target i686-unknown-linux-musl
       - name: Strip
-        run: strip target/i686-unknown-linux-musl/release/odyn
+        run: i686-linux-gnu-strip target/i686-unknown-linux-musl/release/odyn
       - name: Rename
         run: cp target/i686-unknown-linux-musl/release/odyn odyn-linux-i686-musl
       - name: Upload
@@ -201,7 +201,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target armv7-unknown-linux-gnueabihf
       - name: Strip
-        run: strip target/armv7-unknown-linux-gnueabihf/release/odyn
+        run: arm-linux-gnueabihf-strip target/armv7-unknown-linux-gnueabihf/release/odyn
       - name: Rename
         run: cp target/armv7-unknown-linux-gnueabihf/release/odyn odyn-linux-armv7
       - name: Upload
@@ -227,7 +227,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target armv7-unknown-linux-musleabihf
       - name: Strip
-        run: strip target/armv7-unknown-linux-musleabihf/release/odyn
+        run: arm-linux-gnueabihf-strip target/armv7-unknown-linux-musleabihf/release/odyn
       - name: Rename
         run: cp target/armv7-unknown-linux-musleabihf/release/odyn odyn-linux-armv7-musl
       - name: Upload
@@ -253,7 +253,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target arm-unknown-linux-gnueabihf
       - name: Strip
-        run: strip target/arm-unknown-linux-gnueabihf/release/odyn
+        run: arm-linux-gnueabihf-strip target/arm-unknown-linux-gnueabihf/release/odyn
       - name: Rename
         run: cp target/arm-unknown-linux-gnueabihf/release/odyn odyn-linux-armv6
       - name: Upload
@@ -279,7 +279,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_ARM_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target arm-unknown-linux-musleabihf
       - name: Strip
-        run: strip target/arm-unknown-linux-musleabihf/release/odyn
+        run: arm-linux-gnueabihf-strip target/arm-unknown-linux-musleabihf/release/odyn
       - name: Rename
         run: cp target/arm-unknown-linux-musleabihf/release/odyn odyn-linux-armv6-musl
       - name: Upload
@@ -305,7 +305,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_LINKER=powerpc64-linux-gnu-gcc cargo build --release --target powerpc64-unknown-linux-gnu
       - name: Strip
-        run: strip target/powerpc64-unknown-linux-gnu/release/odyn
+        run: powerpc64-linux-gnu-strip target/powerpc64-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/powerpc64-unknown-linux-gnu/release/odyn odyn-linux-powerpc64
       - name: Upload
@@ -331,7 +331,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_LINKER=powerpc64le-linux-gnu-gcc cargo build --release --target powerpc64le-unknown-linux-gnu
       - name: Strip
-        run: strip target/powerpc64le-unknown-linux-gnu/release/odyn
+        run: powerpc64le-linux-gnu-strip target/powerpc64le-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/powerpc64le-unknown-linux-gnu/release/odyn odyn-linux-powerpc64le
       - name: Upload
@@ -357,7 +357,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_LINKER=s390x-linux-gnu-gcc cargo build --release --target s390x-unknown-linux-gnu
       - name: Strip
-        run: strip target/s390x-unknown-linux-gnu/release/odyn
+        run: s390x-linux-gnu-strip target/s390x-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/s390x-unknown-linux-gnu/release/odyn odyn-linux-s390x
       - name: Upload
@@ -383,7 +383,7 @@ jobs:
       - name: Build
         run: CARGO_TARGET_SPARC64_UNKNOWN_LINUX_GNU_LINKER=sparc64-linux-gnu-gcc cargo build --release --target sparc64-unknown-linux-gnu
       - name: Strip
-        run: strip target/sparc64-unknown-linux-gnu/release/odyn
+        run: sparc64-linux-gnu-strip target/sparc64-unknown-linux-gnu/release/odyn
       - name: Rename
         run: cp target/sparc64-unknown-linux-gnu/release/odyn odyn-linux-sparc64
       - name: Upload
@@ -393,7 +393,7 @@ jobs:
           path: odyn-linux-sparc64
 
   build-windows-x86_64:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -417,7 +417,7 @@ jobs:
           path: odyn-windows-x86_64.exe
 
   build-windows-i686:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -459,10 +459,15 @@ jobs:
       - build-linux-sparc64
       - build-windows-x86_64
       - build-windows-i686
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
+        with:
+          path: dist/
+
+      - name: Flatten artifacts
+        run: find dist/ -type f -exec mv {} . \;
 
       - name: Generate SHA256SUMS
         run: sha256sum odyn-* > SHA256SUMS
