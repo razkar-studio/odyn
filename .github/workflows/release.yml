@@ -82,8 +82,6 @@ jobs:
 
       - name: Build
         run: cross build --release --target aarch64-linux-android
-      - name: Strip
-        run: strip target/aarch64-linux-android/release/odyn
       - name: Rename
         run: cp target/aarch64-linux-android/release/odyn odyn-android-aarch64
       - name: Upload to Codeberg release
@@ -111,8 +109,6 @@ jobs:
 
       - name: Build
         run: cross build --release --target armv7-linux-androideabi
-      - name: Strip
-        run: strip target/armv7-linux-androideabi/release/odyn
       - name: Rename
         run: cp target/armv7-linux-androideabi/release/odyn odyn-android-armv7
       - name: Upload to Codeberg release
@@ -140,8 +136,6 @@ jobs:
 
       - name: Build
         run: cross build --release --target x86_64-linux-android
-      - name: Strip
-        run: strip target/x86_64-linux-android/release/odyn
       - name: Rename
         run: cp target/x86_64-linux-android/release/odyn odyn-android-x86_64
       - name: Upload to Codeberg release
