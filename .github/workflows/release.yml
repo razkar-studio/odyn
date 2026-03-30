@@ -28,11 +28,14 @@ jobs:
 
       - name: Upload to Codeberg release
         run: |
+          RELEASE_ID=$(curl -sf \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
           curl -X POST \
             -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @odyn-macos-x86_64 \
-            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=odyn-macos-x86_64"
+            -F "attachment=@odyn-macos-x86_64" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/${RELEASE_ID}/assets?name=odyn-macos-x86_64"
 
   build-macos-aarch64:
     runs-on: macos-14
@@ -56,11 +59,14 @@ jobs:
 
       - name: Upload to Codeberg release
         run: |
+          RELEASE_ID=$(curl -sf \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
           curl -X POST \
             -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @odyn-macos-aarch64 \
-            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}/assets?name=odyn-macos-aarch64"
+            -F "attachment=@odyn-macos-aarch64" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/${RELEASE_ID}/assets?name=odyn-macos-aarch64"
 
   generate-sums:
     needs:
