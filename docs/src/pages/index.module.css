@@ -16,8 +16,24 @@
   }
 }
 
+.docsLink {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  font-family: var(--ifm-font-family-monospace);
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.docsLink:hover {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: underline;
+}
+
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
 }

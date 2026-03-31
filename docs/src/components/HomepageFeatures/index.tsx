@@ -11,32 +11,34 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Pin Once, Sync Anywhere',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Add a dependency with <code>odyn get</code> and its commit hash is
+        written to <code>Odyn.lock</code>. Run <code>odyn sync</code> on any
+        machine to reproduce the exact same state.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'No Registry, No Surprises',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Odyn has no central registry and no transitive dependency resolution.
+        Every dependency in your project is one you explicitly added.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Plain Git Under the Hood',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Odyn clones real Git repos into <code>odyn_deps/</code>. No custom
+        archive format, no proprietary index. Browse, audit, or replace any
+        dependency with standard Git tools.
       </>
     ),
   },

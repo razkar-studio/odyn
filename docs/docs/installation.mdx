@@ -1,0 +1,126 @@
+---
+id: installation
+title: Installation
+description: How to install Odyn
+sidebar_position: 2
+slug: /install
+---
+
+## Installation Methods
+
+Install Odyn with the standalone installers or any method of your choice
+
+### Standalone Installer
+
+Odyn provides a standalone installer to download and install Odyn:
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Admonition from '@theme/Admonition';
+
+<Tabs>
+  <TabItem value="not_windows" label="macOS/Linux/Android/FreeBSD/NetBSD">
+
+Use `curl` to download the script and execute it with `sh`:
+```sh
+curl -fsSL https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | sh
+```
+
+If your system doesn't have `curl`, you can use `wget`:
+```sh
+wget -qO- https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | sh
+```
+
+<Admonition type="tip">
+
+The installation script may be inspected before use:
+
+```sh
+curl -fsSL https://codeberg.org/razkar/odyn/raw/branch/main/install.sh | less
+```
+
+</Admonition>
+
+  </TabItem>
+  <TabItem value="windows" label="Windows PowerShell">
+
+Use `irm` to download the script and execute it with `iex`:
+
+```powershell
+irm https://codeberg.org/razkar/odyn/raw/branch/main/install.ps1 | iex
+```
+
+<Admonition type="note">
+
+On Windows, you may need to allow script execution first:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+</Admonition>
+
+<Admonition type="tip">
+
+The installation script may be inspected before use:
+
+```powershell
+irm https://codeberg.org/razkar/odyn/raw/branch/main/install.ps1 | more
+```
+
+</Admonition>
+
+  </TabItem>
+</Tabs>
+
+### Codeberg Releases
+
+Odyn's release artifacts can be found on [Codeberg Releases](https://codeberg.org/razkar/odyn/releases).
+
+Each release contains binaries of each supported platform that can be directly downloaded.
+
+### Cargo
+
+Odyn is available via [crates.io](https://crates.io/crates/odyn).
+
+```sh
+cargo install odyn
+```
+
+:::note
+This method builds Odyn from source, which requires a compatible Rust toolchain.
+:::
+
+## Upgrading Odyn
+
+When Odyn is installed from any of these methods except Cargo, it can update itself on-demand:
+
+```sh
+odyn update-self
+```
+
+This will fetch the latest release binary from the Codeberg Releases page.
+
+## Uninstallation
+
+If you need to remove Odyn from your system, you only need to remove the Odyn binary:
+
+<Tabs>
+  <TabItem value="not_windows" label="macOS/Linux/Android/FreeBSD/NetBSD">
+
+```sh
+rm ~/.local/bin/odyn
+```
+    
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+    
+```powershell
+rm $HOME\.local\bin\odyn.exe
+```
+    
+  </TabItem>    
+</Tabs>
+
+:::note
+The path assumes you installed using the script and did not move the binary. Please modify it if you need to.
+:::

@@ -1,47 +1,37 @@
 ---
+id: intro
+title: Introduction
+description: What is Odyn and what problem does it solve?
 sidebar_position: 1
+slug: /intro
 ---
 
-# Tutorial Intro
+## What is Odyn?
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Odyn is a *reproducible vendoring tool* for the Odin programming language. Not a package manager.
 
-## Getting Started
+At the core, Odyn clones Git repos into `odyn_deps/` and writes the commit hash to `Odyn.lock`. That's it. You could theoretically do this yourself with a spreadsheet and a free afternoon.
 
-Get started by **creating a new site**.
+It has no registry, no account, nor any solver. No transitive dependencies filling everything up without you knowing. What goes in is entirely your call, Odyn just makes sure it's pinned and reproducible on any machine.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+## What Odyn Is Not
 
-### What you'll need
+Odyn is not a package manager, and it never will be. It automates exactly one thing: reproducible vendoring.
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+:::info
+Odyn disallows *local git repos* by nature, since it prevents reproducibility across other machines.
+It's better to commit your local dependencies instead.
+:::
 
-## Generate a new site
+## Quick Start
+```sh
+odyn init myproject
+cd myproject
 
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
-```bash
-npm init docusaurus@latest my-website classic
+odyn get odin-community/math
+odyn sync
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+`odyn get` clones and pins the commit hash to `Odyn.lock`. `odyn sync` makes everything match that lockfile on other machines.
 
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+Let's get to installing Odyn on your machine. Don't worry, it covers more platforms than you think.
