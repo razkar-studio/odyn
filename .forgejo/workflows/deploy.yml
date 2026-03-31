@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     steps:
       - name: Checkout source
         uses: https://code.forgejo.org/actions/checkout@v4
@@ -30,8 +30,8 @@ jobs:
       - name: Deploy to pages branch
         uses: https://github.com/peaceiris/actions-gh-pages@v4
         with:
-          personal_token: ${{ secrets.CODEBERG_TOKEN }}
-          external_repository: YOUR_USERNAME/YOUR_REPO_NAME
+          personal_token: ${{ secrets.RELEASE_TOKEN }}
+          external_repository: razkar/odyn
           publish_branch: pages
           publish_dir: docs/build
           force_orphan: true
