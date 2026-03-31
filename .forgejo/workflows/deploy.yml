@@ -28,10 +28,8 @@ jobs:
         run: npm run build
 
       - name: Deploy to pages branch
-        uses: https://github.com/peaceiris/actions-gh-pages@v4
+        uses: https://codeberg.org/git-pages/action@v2
         with:
-          personal_token: ${{ secrets.RELEASE_TOKEN }}
-          external_repository: razkar/odyn
-          publish_branch: pages
-          publish_dir: docs/build
-          force_orphan: true
+          site: "https://razkar.codeberg.page/odyn/"
+          token: ${{ forge.token }}
+          source: docs/build/
