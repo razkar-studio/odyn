@@ -49,7 +49,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: "img/docusaurus-social-card.jpg",
+    image: "img/social-card.png",
     colorMode: {
       defaultMode: "dark",
       respectPrefersColorScheme: true,
@@ -101,7 +101,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} RazkarStudio. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} RazkarStudio.`,
     },
     prism: {
       theme: prismThemes.github,
