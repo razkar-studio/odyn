@@ -6,7 +6,7 @@ Odyn is constantly updating. All notable changes to it is documented here.
 
 ### Added
 
-- `odyn version` subcommand: alias for `--version`, usable as a proper subcommand
+- `odyn version` subcommand: alias for `--version`, usable as a proper subcommand.
 - `odyn --version` / `odyn version` now shows the detected git version below the description, in orange. Prints "Git Not Installed" in red if git is not on PATH
 - `--verbose` flag for `--version` / `version`: prints install path and build date
 - `odyn update-self --pre-release`: updates to the latest pre-release instead of the latest stable release
