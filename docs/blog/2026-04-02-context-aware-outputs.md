@@ -24,7 +24,7 @@ its environment: the OS, the architecture, how it was installed, whether it's a 
 point is that the output becomes *meaningful to the specific person running it*.
 
 Certain things are better context-aware, but not all of them should be if they slow things down. Too many context 
-awareness is also scary, and is leaning towards telemetry, which is *almost* always bad.
+awareness is also scary, and is leaning towards telemetry, a fancy word for surveillance, which is not cool.
 
 ## Odyn's `--version` Flag
 
