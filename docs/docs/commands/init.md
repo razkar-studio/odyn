@@ -41,6 +41,7 @@ odin run src -collection:deps=odyn_deps
 | `--license <name>`  | `mit`   | License to write to `LICENSE`. See [Licenses](#licenses) below. |
 | `--with-readme`     | off     | Creates a `README.md` stub at the project root. |
 | `--no-src`          | off     | Skips creating `src/` and places `main.odin` at the project root instead. |
+| `--migrate`         | off     | Migrate an existing Odin project to Odyn. See [Migrating an existing project](#migrating-an-existing-project) below. |
 
 ## Examples
 
@@ -76,7 +77,23 @@ The `--license` flag accepts the following values:
 
 Passing any other string writes a plain `License: <value>` file instead of erroring out.
 
+## Migrating an existing project
+
+If you already have an Odin project and want to start using Odyn without scaffolding a new directory, run:
+
+```sh
+cd myproject
+odyn init --migrate
+```
+
+This adds `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` to the current directory. No existing files are touched or overwritten. The command errors if any of those three already exist.
+
+:::tip
+After migrating, run `odyn get` to start adding dependencies and commit the resulting `Odyn.lock`.
+:::
+
 ## Notes
 
 - `init` fails if the target directory already exists.
+- `init --migrate` fails if `odyn_deps/`, `ols.json`, or `Odyn.lock` already exist in the current directory.
 - The project name is used verbatim as the directory name and inside `main.odin`'s package name.

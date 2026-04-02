@@ -3,6 +3,7 @@ mod constants;
 mod storage;
 mod ui;
 
+use anyhow::anyhow;
 use clap::{Parser, Subcommand};
 
 use ui::{init_styles, status};
@@ -25,6 +26,10 @@ use crate::commands::{
 struct Cli {
     #[arg(long, short = 'V', action = clap::ArgAction::SetTrue)]
     version: bool,
+
+    /// Print extra details (install path, build date). Only meaningful with --version.
+    #[arg(long, action = clap::ArgAction::SetTrue)]
+    verbose: bool,
 
     #[command(subcommand)]
     command: Option<Commands>,
@@ -53,6 +58,16 @@ enum Commands {
         /// Pin a specific commit instead of HEAD.
         #[arg(long)]
         commit: Option<String>,
+
+        /// Perform a shallow clone with the given history depth.
+        /// Passes `--depth <n>` to git, limiting the number of commits fetched.
+        /// Useful for large repositories where full history is not needed.
+        #[arg(long)]
+        depth: Option<u32>,
+
+        /// Extra arguments to pass directly to `git clone`.
+        #[arg(last = true)]
+        extra_args: Vec<String>,
     },
 
     /// Create a new Odin project with the standard layout.
@@ -62,7 +77,7 @@ enum Commands {
     /// adjust what gets generated.
     Init {
         /// Name of the project directory to create.
-        project_name: String,
+        project_name: Option<String>,
 
         /// License to generate. Defaults to mit.
         /// Options: mit, apache, gpl3, bsd2, bsd3, mpl2, unlicense, zlib, isc
@@ -76,6 +91,14 @@ enum Commands {
         /// Skip creating the `src/` directory.
         #[arg(long)]
         no_src: bool,
+
+        /// Migrate an existing Odin project to use Odyn.
+        ///
+        /// Adds `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` to the
+        /// current directory. Does not create `src/` or any other files.
+        /// Errors if any of these already exist.
+        #[arg(long)]
+        migrate: bool,
     },
 
     /// Sync `odyn_deps/` to match Odyn.lock exactly.
@@ -126,7 +149,22 @@ enum Commands {
     /// <https://codeberg.org/razkar/odyn/releases> and replaces
     /// the current executable.
     #[command(name = "update-self")]
-    UpdateSelf,
+    UpdateSelf {
+        /// Update to the latest pre-release instead of the latest stable.
+        #[arg(long)]
+        pre_release: bool,
+
+        /// Update to the latest nightly build.
+        #[arg(long)]
+        nightly: bool,
+    },
+
+    /// Print version information.
+    Version {
+        /// Print extra details: install path and build date.
+        #[arg(long, action = clap::ArgAction::SetTrue)]
+        verbose: bool,
+    },
 }
 
 fn main() {
@@ -134,8 +172,17 @@ fn main() {
     let cli = Cli::parse();
 
     if cli.version {
-        cmd_version();
+        cmd_version(cli.verbose);
         return;
+    }
+
+    if cli.verbose && cli.command.is_none() {
+        status(
+            "Error",
+            "error",
+            "--verbose only makes sense with --version or the 'version' subcommand",
+        );
+        std::process::exit(1);
     }
 
     if let Err(e) = run(cli) {
@@ -152,9 +199,11 @@ fn run(cli: Cli) -> anyhow::Result<()> {
                 name,
                 platform,
                 commit,
+                depth,
+                extra_args,
             } => {
                 status("Getting", "load", &format!("'{source}'"));
-                cmd_get(source, name, platform, commit)?;
+                cmd_get(source, name, platform, commit, depth, extra_args)?;
                 status("Done", "success", "dependency added");
             }
             Commands::Init {
@@ -162,14 +211,23 @@ fn run(cli: Cli) -> anyhow::Result<()> {
                 license,
                 with_readme,
                 no_src,
+                migrate,
             } => {
-                status(
-                    "Creating",
-                    "load",
-                    &format!("odin project '{project_name}'"),
-                );
-                cmd_init(project_name.clone(), license, with_readme, no_src)?;
-                status("Created", "success", &format!("'{project_name}'"));
+                if !migrate && project_name.is_none() {
+                    return Err(anyhow!("project name is required. usage: odyn init <name>"));
+                }
+                let name = project_name.unwrap_or_default();
+                if migrate {
+                    status("Migrating", "load", "current project");
+                } else {
+                    status("Creating", "load", &format!("odin project '{name}'",));
+                }
+                cmd_init(name.clone(), license, with_readme, no_src, migrate)?;
+                if migrate {
+                    status("Migrated", "success", "project to Odyn");
+                } else {
+                    status("Created", "success", &format!("'{name}'"));
+                }
             }
             Commands::Sync { force, skip } => {
                 cmd_sync(force, skip)?;
@@ -182,11 +240,14 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             Commands::Update { name } => {
                 cmd_update(name)?;
             }
-            Commands::UpdateSelf => {
-                cmd_update_self()?;
+            Commands::UpdateSelf { pre_release, nightly } => {
+                cmd_update_self(pre_release, nightly)?;
             }
             Commands::Status => {
                 cmd_status()?;
+            }
+            Commands::Version { verbose } => {
+                cmd_version(verbose);
             }
         },
         None => unreachable!(),

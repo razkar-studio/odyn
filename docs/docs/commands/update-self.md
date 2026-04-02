@@ -11,18 +11,38 @@ Downloads the latest Odyn release from Codeberg and replaces the current binary 
 ## Usage
 
 ```sh
-odyn update-self
+odyn update-self [options]
 ```
 
-No flags.
+## Options
+
+| Flag | Description |
+|---|---|
+| `--pre-release` | Update to the latest pre-release instead of the latest stable release |
+| `--nightly` | Build and install the latest commit from `main` via `cargo install --git` |
+
+`--pre-release` and `--nightly` cannot be used together.
+
+:::note
+`--nightly` builds from source and **requires Cargo to be installed** on your system.
+It does not download a pre-built binary. The installed binary will identify itself as a nightly build when you run `odyn --version`.
+:::
 
 ## What it does
 
-1. Queries the Codeberg API for the latest release tag.
+### Stable / pre-release
+
+1. Queries the Codeberg API for the target release tag.
 2. If the current version is already up to date (or newer), exits without downloading anything.
 3. Downloads the correct binary for your OS and architecture.
 4. Fetches the release's `SHA256SUMS` file and verifies the download matches.
 5. Replaces the running `odyn` binary with the downloaded one.
+
+### Nightly (`--nightly`)
+
+1. Fetches the latest commit SHA from the `main` branch for display.
+2. Runs `cargo install --git https://codeberg.org/razkar/odyn.git --force --no-default-features`.
+3. The installed binary self-identifies as a nightly build (`odyn --version` shows `Nightly, commit <hash>`).
 
 ## Supported platforms
 

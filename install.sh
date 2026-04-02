@@ -1,18 +1,17 @@
 #!/bin/sh
 # Odyn installer
-# Installs the latest release of Odyn to ~/.local/bin
 # https://codeberg.org/razkar/odyn
 
 set -eu
 
 REPO="razkar/odyn"
-INSTALL_DIR="$HOME/.local/bin"
 BINARY_NAME="odyn"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
 RESET='\033[0m'
 
 info()    { printf "${BLUE}    install${RESET} %s\n" "$1"; }
@@ -105,6 +104,35 @@ case "${os}-${arch}" in
     *)                 error "no binary available for ${os}-${arch}. build from source: https://codeberg.org/razkar/odyn" ;;
 esac
 
+# Choose install location
+USE_SUDO=0
+if [ "$os" = "android" ]; then
+    # Termux: install into the Termux prefix bin
+    INSTALL_DIR="${PREFIX:-/data/data/com.termux/files/usr}/bin"
+elif [ "$(id -u)" = "0" ]; then
+    # Already root: default to system-wide silently
+    INSTALL_DIR="/usr/local/bin"
+elif [ -t 0 ]; then
+    printf "\n${CYAN}  Install type:${RESET}\n"
+    printf "    1) User        ~/.local/bin\n"
+    printf "    2) System-wide /usr/local/bin  (requires sudo)\n"
+    printf "  Choice [1]: "
+    read -r install_choice
+    case "${install_choice:-1}" in
+        2)
+            INSTALL_DIR="/usr/local/bin"
+            USE_SUDO=1
+            ;;
+        *)
+            INSTALL_DIR="$HOME/.local/bin"
+            ;;
+    esac
+    printf "\n"
+else
+    # Non-interactive (piped): default to user install
+    INSTALL_DIR="$HOME/.local/bin"
+fi
+
 info "fetching latest version..."
 api_response="$(download_string "https://codeberg.org/api/v1/repos/${REPO}/releases/latest")"
 version="$(printf '%s' "$api_response" | grep -o '"tag_name":"[^"]*"' | grep -o ':[^}]*' | tr -d ':"')"
@@ -158,20 +186,31 @@ fi
 
 success "checksum verified"
 
-mkdir -p "$INSTALL_DIR"
 chmod +x "$tmp_binary"
-mv "$tmp_binary" "${INSTALL_DIR}/${BINARY_NAME}"
+if [ "$USE_SUDO" = "1" ]; then
+    sudo mkdir -p "$INSTALL_DIR"
+    sudo mv "$tmp_binary" "${INSTALL_DIR}/${BINARY_NAME}"
+else
+    mkdir -p "$INSTALL_DIR"
+    mv "$tmp_binary" "${INSTALL_DIR}/${BINARY_NAME}"
+fi
 
 success "odyn $version installed to ${INSTALL_DIR}/${BINARY_NAME}"
 
 case ":$PATH:" in
     *":$INSTALL_DIR:"*)
-        success "~/.local/bin is already on your PATH. you're good to go!"
+        success "$INSTALL_DIR is already on your PATH. you're good to go!"
         ;;
     *)
-        warn "~/.local/bin is not on your PATH."
-        warn "add the following to your shell config (~/.bashrc, ~/.zshrc, etc.):"
-        printf "\n    export PATH=\"\$HOME/.local/bin:\$PATH\"\n\n"
-        warn "then restart your shell or run: source ~/.bashrc"
+        if [ "$USE_SUDO" = "1" ]; then
+            warn "$INSTALL_DIR is not on your PATH."
+            warn "add the following to your shell config (~/.bashrc, ~/.zshrc, etc.):"
+            printf "\n    export PATH=\"%s:\$PATH\"\n\n" "$INSTALL_DIR"
+        else
+            warn "~/.local/bin is not on your PATH."
+            warn "add the following to your shell config (~/.bashrc, ~/.zshrc, etc.):"
+            printf "\n    export PATH=\"\$HOME/.local/bin:\$PATH\"\n\n"
+            warn "then restart your shell or run: source ~/.bashrc"
+        fi
         ;;
 esac

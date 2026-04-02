@@ -1,11 +1,9 @@
 # Odyn installer for Windows
-# Installs the latest release of Odyn to $env:USERPROFILE\.local\bin
 # https://codeberg.org/razkar/odyn
 
 $ErrorActionPreference = "Stop"
 
 $Repo = "razkar/odyn"
-$InstallDir = "$env:USERPROFILE\.local\bin"
 $BinaryName = "odyn.exe"
 
 function Write-Info    { Write-Host ("    install " + $args[0]) -ForegroundColor Blue }
@@ -19,6 +17,30 @@ $binary = switch ($arch) {
     "x86"   { "odyn-windows-i686.exe" }
     "ARM64" { Write-Fail "Windows ARM64 is not yet supported. check https://codeberg.org/razkar/odyn/releases for updates." }
     default { Write-Fail "unsupported architecture: $arch" }
+}
+
+# Detect admin
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+    [Security.Principal.WindowsBuiltInRole]::Administrator
+)
+
+# Choose install location
+Write-Host ""
+Write-Host "  Install type:" -ForegroundColor Cyan
+Write-Host ("    1) User        " + $env:USERPROFILE + "\.local\bin")
+Write-Host  "    2) System-wide $env:ProgramFiles\odyn  (requires Administrator)"
+$installChoice = Read-Host "  Choice [1]"
+Write-Host ""
+
+if ($installChoice -eq "2") {
+    if (-not $isAdmin) {
+        Write-Fail "system-wide install requires Administrator. re-run this script as Administrator."
+    }
+    $InstallDir = "$env:ProgramFiles\odyn"
+    $PathScope = "Machine"
+} else {
+    $InstallDir = "$env:USERPROFILE\.local\bin"
+    $PathScope = "User"
 }
 
 Write-Info "fetching latest version..."
@@ -92,7 +114,7 @@ try {
 
 Write-Success "odyn $version installed to $InstallDir\$BinaryName"
 
-$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+$currentPath = [Environment]::GetEnvironmentVariable("PATH", $PathScope)
 $pathEntries = if ($currentPath) { $currentPath -split ";" } else { @() }
 if ($pathEntries -contains $InstallDir) {
     Write-Success "$InstallDir is already on your PATH. you're good to go!"
@@ -100,10 +122,6 @@ if ($pathEntries -contains $InstallDir) {
     Write-Warn "$InstallDir is not on your PATH."
     Write-Warn "adding it now..."
     $newPath = if ($currentPath) { "$currentPath;$InstallDir" } else { $InstallDir }
-    [Environment]::SetEnvironmentVariable(
-        "PATH",
-        $newPath,
-        "User"
-    )
+    [Environment]::SetEnvironmentVariable("PATH", $newPath, $PathScope)
     Write-Success "PATH updated. restart your terminal for changes to take effect."
 }

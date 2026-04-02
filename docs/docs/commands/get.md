@@ -22,6 +22,8 @@ odyn get <source> [name] [options]
 |---|---|---|
 | `--platform <name>` | `github` | Platform to resolve `user/repo` shorthands against. See [Platforms](#platforms) below. |
 | `--commit <hash>` | HEAD | Pin a specific commit instead of the current HEAD. |
+| `--depth <n>` | full | Perform a shallow clone fetching only the last `n` commits. |
+| `-- <args>` | — | Extra arguments passed directly to `git clone`. Must come after all other flags. |
 
 ## Examples
 
@@ -40,6 +42,12 @@ odyn get odin-community/math --commit a1b2c69
 
 # Use a custom folder name in odyn_deps/
 odyn get odin-community/math mymath
+
+# Shallow clone (last 1 commit only)
+odyn get odin-community/math --depth 1
+
+# Pass extra git clone arguments
+odyn get odin-community/math -- --filter=blob:none
 ```
 
 ## Platforms

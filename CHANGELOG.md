@@ -2,7 +2,21 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
-## [0.2.0] - Soon
+## [0.3.0] - Unreleased
+
+### Added
+
+- `odyn version` subcommand: alias for `--version`, usable as a proper subcommand
+- `odyn --version` / `odyn version` now shows the detected git version below the description, in orange. Prints "Git Not Installed" in red if git is not on PATH
+- `--verbose` flag for `--version` / `version`: prints install path and build date
+- `odyn update-self --pre-release`: updates to the latest pre-release instead of the latest stable release
+- `odyn update-self --nightly`: builds and installs the latest commit from `main` via `cargo install --git`. Requires Cargo to be installed
+- `odyn get --depth <n>`: performs a shallow clone with `git clone --depth <n>`
+- `odyn get -- <args>`: passes extra arguments directly to `git clone`
+- `odyn init --migrate`: migrates an existing Odin project to Odyn by adding `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` in place. Does not create `src/` or overwrite existing files
+- `install.sh` and `install.ps1` now offer a choice between user install (`~/.local/bin`) and system-wide install (`/usr/local/bin` on Unix, `%ProgramFiles%\odyn` on Windows). System-wide install uses `sudo` on Unix and requires Administrator on Windows
+
+## [0.2.0] - 2026-03-31
 
 The More The Merrier!
 

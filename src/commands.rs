@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     constants::{
-        APACHE_LICENSE, BSD2_LICENSE, BSD3_LICENSE, DEPS_DIR, GPL3_LICENSE, ISC_LICENSE,
+        APACHE_LICENSE, BSD2_LICENSE, BSD3_LICENSE, DEPS_DIR, GPL3_LICENSE, ISC_LICENSE, LOCKFILE,
         MIT_LICENSE, MPL2_LICENSE, OLS_JSON, UNLICENSE, VERSION, ZLIB_LICENSE,
     },
     storage::{
@@ -41,7 +41,7 @@ fn git_head(dep_path: &PathBuf) -> Result<String> {
         .to_string())
 }
 
-pub(crate) fn cmd_version() {
+pub(crate) fn cmd_version(verbose: bool) {
     let extra = match env!("ODYN_INSTALL_METHOD") {
         "cargo" => "[ansi(173)]Cargo Edition".to_string(),
         "source" => {
@@ -73,6 +73,26 @@ pub(crate) fn cmd_version() {
     };
     cprintln!("[bold blue]Odyn[/blue] v{VERSION} {extra}");
     println!("    Reproducible vendoring tool for the Odin programming language.");
+
+    let git_version = std::process::Command::new("git")
+        .arg("--version")
+        .output()
+        .ok()
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .map(|s| s.trim().to_string());
+
+    match git_version {
+        Some(v) => cprintln!("    [ansi(214)]{}[/ansi(214)][/bold]", v),
+        None => cprintln!("    [bright-red]Git Not Installed[/bright-red]"),
+    }
+
+    if verbose {
+        let install_path = std::env::current_exe()
+            .map(|p| p.display().to_string())
+            .unwrap_or_else(|_| "unknown".to_string());
+        cprintln!("    [dim]installed at {}[/dim]", install_path);
+        cprintln!("    [dim]built on {}[/dim]", env!("ODYN_BUILD_DATE"));
+    }
 }
 
 pub(crate) fn cmd_init(
@@ -80,7 +100,30 @@ pub(crate) fn cmd_init(
     license: String,
     with_readme: bool,
     no_src: bool,
+    migrate: bool,
 ) -> Result<()> {
+    if migrate {
+        let deps_dir = PathBuf::from(DEPS_DIR);
+        let ols = PathBuf::from("ols.json");
+        let lockfile = PathBuf::from(LOCKFILE);
+
+        if deps_dir.exists() {
+            return Err(anyhow!("'{}' already exists", DEPS_DIR));
+        }
+        if ols.exists() {
+            return Err(anyhow!("'ols.json' already exists"));
+        }
+        if lockfile.exists() {
+            return Err(anyhow!("'Odyn.lock' already exists"));
+        }
+
+        std::fs::create_dir_all(&deps_dir)?;
+        std::fs::write(&ols, OLS_JSON)?;
+        save_lockfile_at(&Lockfile { dep: Vec::new() }, &PathBuf::from("."))?;
+
+        return Ok(());
+    }
+
     let root: PathBuf = PathBuf::from(&project_name);
 
     if root.exists() {
@@ -122,9 +165,53 @@ pub(crate) fn cmd_init(
     Ok(())
 }
 
-pub(crate) fn cmd_update_self() -> Result<()> {
+pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
+    if pre_release && nightly {
+        return Err(anyhow!("--pre-release and --nightly cannot be used together"));
+    }
+
     let os = std::env::consts::OS;
     let arch = std::env::consts::ARCH;
+
+    if nightly {
+        let commit = ureq::get(
+            "https://codeberg.org/api/v1/repos/razkar/odyn/branches/main",
+        )
+        .call()
+        .ok()
+        .and_then(|mut r| r.body_mut().read_to_string().ok())
+        .and_then(|body| {
+            body.split("\"sha\":")
+                .nth(1)?
+                .trim_start_matches([' ', '\t'])
+                .strip_prefix('"')?
+                .split('"')
+                .next()
+                .map(|s| s[..8].to_string())
+        })
+        .unwrap_or_else(|| "unknown".to_string());
+
+        status("Nightly", "load", &format!("building from commit {commit}..."));
+
+        let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
+        let exit = std::process::Command::new(&cargo)
+            .args([
+                "install",
+                "--git", "https://codeberg.org/razkar/odyn.git",
+                "--force",
+                "--no-default-features",
+            ])
+            .env("ODYN_INSTALL_METHOD", "source")
+            .status()
+            .map_err(|e| anyhow!("failed to run cargo: {e}"))?;
+
+        if !exit.success() {
+            return Err(anyhow!("cargo install failed"));
+        }
+
+        status("Updated", "success", &format!("odyn nightly installed (commit {commit})"));
+        return Ok(());
+    }
 
     let binary_name = match (os, arch) {
         ("linux", "x86_64") => "odyn-linux-x86_64",
@@ -152,19 +239,45 @@ pub(crate) fn cmd_update_self() -> Result<()> {
         }
     };
 
-    let body = ureq::get("https://codeberg.org/api/v1/repos/razkar/odyn/releases/latest")
+    let latest: String = if pre_release {
+        let body = ureq::get(
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases?limit=20&draft=false",
+        )
         .call()
-        .map_err(|e| anyhow!("failed to fetch latest release: {e}"))?
+        .map_err(|e| anyhow!("failed to fetch releases: {e}"))?
         .body_mut()
         .read_to_string()?;
 
-    let latest = body
-        .split("\"tag_name\":")
-        .nth(1)
-        .and_then(|s| s.trim_start_matches([' ', '\t']).strip_prefix('"'))
-        .and_then(|s| s.split('"').next())
-        .ok_or_else(|| anyhow!("could not parse release info from Codeberg API"))?
-        .trim_start_matches('v');
+        body.split("\"tag_name\":")
+            .skip(1)
+            .find_map(|s| {
+                Some(
+                    s.trim_start_matches([' ', '\t'])
+                        .strip_prefix('"')?
+                        .split('"')
+                        .next()?
+                        .to_string(),
+                )
+            })
+            .ok_or_else(|| anyhow!("no pre-release found on Codeberg"))?
+            .trim_start_matches('v')
+            .to_string()
+    } else {
+        let body = ureq::get("https://codeberg.org/api/v1/repos/razkar/odyn/releases/latest")
+            .call()
+            .map_err(|e| anyhow!("failed to fetch latest release: {e}"))?
+            .body_mut()
+            .read_to_string()?;
+
+        body.split("\"tag_name\":")
+            .nth(1)
+            .and_then(|s| s.trim_start_matches([' ', '\t']).strip_prefix('"'))
+            .and_then(|s| s.split('"').next())
+            .ok_or_else(|| anyhow!("could not parse release info from Codeberg API"))?
+            .trim_start_matches('v')
+            .to_string()
+    };
+    let latest = latest.as_str();
 
     if latest == VERSION {
         status(
@@ -175,7 +288,7 @@ pub(crate) fn cmd_update_self() -> Result<()> {
         return Ok(());
     }
 
-    if VERSION > latest {
+    if !pre_release && !nightly && VERSION > latest {
         status(
             "Newer",
             "warn",
@@ -524,6 +637,8 @@ pub(crate) fn cmd_get(
     name: Option<String>,
     platform: String,
     commit: Option<String>,
+    depth: Option<u32>,
+    extra_args: Vec<String>,
 ) -> Result<()> {
     let looks_local = source.starts_with('/')
         || source.starts_with("./")
@@ -604,11 +719,15 @@ pub(crate) fn cmd_get(
     let dep_path = PathBuf::from(DEPS_DIR).join(&name);
 
     std::fs::create_dir_all(PathBuf::from(DEPS_DIR))?;
-    let exit_status = std::process::Command::new("git")
-        .arg("clone")
-        .arg(&source)
-        .arg(&dep_path)
-        .status()?;
+
+    let mut cmd = std::process::Command::new("git");
+    cmd.arg("clone");
+    if let Some(n) = depth {
+        cmd.args(["--depth", &n.to_string()]);
+    }
+    cmd.args(extra_args);
+    cmd.arg(&source).arg(&dep_path);
+    let exit_status = cmd.status()?;
 
     if !exit_status.success() {
         return Err(anyhow!("git clone failed"));

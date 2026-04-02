@@ -42,7 +42,7 @@ on *how Odyn was installed*. Let me elaborate:
 
 **From a release binary** (the recommended install path):
 ```
-Odyn v0.3.0 Linux x86_64
+Odyn vX.X.X Linux x86_64
     Reproducible vendoring tool for the Odin programming language.
 ```
 The OS and architecture are shown in color, specific to *your* platform. Linux is yellow, Windows is
@@ -51,14 +51,14 @@ confirmation that you have the right binary for your machine.
 
 **From `cargo install odyn`**:
 ```
-Odyn v0.3.0 Cargo Edition
+Odyn vX.X.X Cargo Edition
     Reproducible vendoring tool for the Odin programming language.
 ```
 You know you're running the crates.io release, compiled for your local machine.
 
 **Built from source**:
 ```
-Odyn v0.3.0 Nightly, commit a1b2c3d
+Odyn vX.X.X Nightly, commit a1b2c3d
     Reproducible vendoring tool for the Odin programming language.
 ```
 You get the short commit hash, handy when reporting bugs or checking if you're on the latest main.
