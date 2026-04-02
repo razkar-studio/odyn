@@ -2,3 +2,18 @@ hola:
   label: Hola
   permalink: /hola
   description: Hello!
+
+cli:
+  label: Command-Line Interface
+  permalink: /cli
+  description: All things CLI
+
+dx:
+  label: Developer-Experience
+  permalink: /dx
+  description: All things related to developer experience
+
+context-aware:
+  label: Context Aware
+  permalink: /context-aware
+  description: About context-awareness

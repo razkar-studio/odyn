@@ -17,7 +17,7 @@ jobs:
       - name: Add target
         run: rustup target add x86_64-unknown-linux-gnu
       - name: Build
-        run: cargo build --release --target x86_64-unknown-linux-gnu
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target x86_64-unknown-linux-gnu
       - name: Strip
         run: strip target/x86_64-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -43,7 +43,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
       - name: Build
-        run: cargo build --release --target x86_64-unknown-linux-musl
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target x86_64-unknown-linux-musl
       - name: Strip
         run: strip target/x86_64-unknown-linux-musl/release/odyn
       - name: Rename
@@ -69,7 +69,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
       - name: Build
-        run: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc cargo build --release --target aarch64-unknown-linux-gnu
+        run: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target aarch64-unknown-linux-gnu
       - name: Strip
         run: aarch64-linux-gnu-strip target/aarch64-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -95,7 +95,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-i686-linux-gnu
       - name: Build
-        run: CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_LINKER=i686-linux-gnu-gcc cargo build --release --target i686-unknown-linux-gnu
+        run: CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_LINKER=i686-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target i686-unknown-linux-gnu
       - name: Strip
         run: i686-linux-gnu-strip target/i686-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -121,7 +121,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-riscv64-linux-gnu
       - name: Build
-        run: CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc cargo build --release --target riscv64gc-unknown-linux-gnu
+        run: CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target riscv64gc-unknown-linux-gnu
       - name: Strip
         run: riscv64-linux-gnu-strip target/riscv64gc-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -147,7 +147,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools
       - name: Build
-        run: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc cargo build --release --target aarch64-unknown-linux-musl
+        run: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target aarch64-unknown-linux-musl
       - name: Strip
         run: aarch64-linux-gnu-strip target/aarch64-unknown-linux-musl/release/odyn
       - name: Rename
@@ -173,7 +173,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-i686-linux-gnu musl-tools
       - name: Build
-        run: CARGO_TARGET_I686_UNKNOWN_LINUX_MUSL_LINKER=i686-linux-gnu-gcc cargo build --release --target i686-unknown-linux-musl
+        run: CARGO_TARGET_I686_UNKNOWN_LINUX_MUSL_LINKER=i686-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target i686-unknown-linux-musl
       - name: Strip
         run: i686-linux-gnu-strip target/i686-unknown-linux-musl/release/odyn
       - name: Rename
@@ -199,7 +199,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf
       - name: Build
-        run: CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target armv7-unknown-linux-gnueabihf
+        run: CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target armv7-unknown-linux-gnueabihf
       - name: Strip
         run: arm-linux-gnueabihf-strip target/armv7-unknown-linux-gnueabihf/release/odyn
       - name: Rename
@@ -225,7 +225,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf musl-tools
       - name: Build
-        run: CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target armv7-unknown-linux-musleabihf
+        run: CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target armv7-unknown-linux-musleabihf
       - name: Strip
         run: arm-linux-gnueabihf-strip target/armv7-unknown-linux-musleabihf/release/odyn
       - name: Rename
@@ -251,7 +251,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf
       - name: Build
-        run: CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target arm-unknown-linux-gnueabihf
+        run: CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target arm-unknown-linux-gnueabihf
       - name: Strip
         run: arm-linux-gnueabihf-strip target/arm-unknown-linux-gnueabihf/release/odyn
       - name: Rename
@@ -277,7 +277,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf musl-tools
       - name: Build
-        run: CARGO_TARGET_ARM_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc cargo build --release --target arm-unknown-linux-musleabihf
+        run: CARGO_TARGET_ARM_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target arm-unknown-linux-musleabihf
       - name: Strip
         run: arm-linux-gnueabihf-strip target/arm-unknown-linux-musleabihf/release/odyn
       - name: Rename
@@ -303,7 +303,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-powerpc64-linux-gnu
       - name: Build
-        run: CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_LINKER=powerpc64-linux-gnu-gcc cargo build --release --target powerpc64-unknown-linux-gnu
+        run: CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_LINKER=powerpc64-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target powerpc64-unknown-linux-gnu
       - name: Strip
         run: powerpc64-linux-gnu-strip target/powerpc64-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -329,7 +329,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-powerpc64le-linux-gnu
       - name: Build
-        run: CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_LINKER=powerpc64le-linux-gnu-gcc cargo build --release --target powerpc64le-unknown-linux-gnu
+        run: CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_LINKER=powerpc64le-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target powerpc64le-unknown-linux-gnu
       - name: Strip
         run: powerpc64le-linux-gnu-strip target/powerpc64le-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -355,7 +355,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-s390x-linux-gnu
       - name: Build
-        run: CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_LINKER=s390x-linux-gnu-gcc cargo build --release --target s390x-unknown-linux-gnu
+        run: CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_LINKER=s390x-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target s390x-unknown-linux-gnu
       - name: Strip
         run: s390x-linux-gnu-strip target/s390x-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -381,7 +381,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-sparc64-linux-gnu
       - name: Build
-        run: CARGO_TARGET_SPARC64_UNKNOWN_LINUX_GNU_LINKER=sparc64-linux-gnu-gcc cargo build --release --target sparc64-unknown-linux-gnu
+        run: CARGO_TARGET_SPARC64_UNKNOWN_LINUX_GNU_LINKER=sparc64-linux-gnu-gcc ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target sparc64-unknown-linux-gnu
       - name: Strip
         run: sparc64-linux-gnu-strip target/sparc64-unknown-linux-gnu/release/odyn
       - name: Rename
@@ -407,7 +407,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-mingw-w64-x86-64
       - name: Build
-        run: cargo build --release --target x86_64-pc-windows-gnu
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target x86_64-pc-windows-gnu
       - name: Rename
         run: cp target/x86_64-pc-windows-gnu/release/odyn.exe odyn-windows-x86_64.exe
       - name: Upload
@@ -431,7 +431,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-mingw-w64-i686
       - name: Build
-        run: cargo build --release --target i686-pc-windows-gnu
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target i686-pc-windows-gnu
       - name: Rename
         run: cp target/i686-pc-windows-gnu/release/odyn.exe odyn-windows-i686.exe
       - name: Upload

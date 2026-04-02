@@ -18,7 +18,7 @@ jobs:
           target: x86_64-apple-darwin
 
       - name: Build
-        run: cargo build --release --target x86_64-apple-darwin
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target x86_64-apple-darwin
 
       - name: Strip
         run: strip target/x86_64-apple-darwin/release/odyn
@@ -49,7 +49,7 @@ jobs:
           target: aarch64-apple-darwin
 
       - name: Build
-        run: cargo build --release --target aarch64-apple-darwin
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target aarch64-apple-darwin
 
       - name: Strip
         run: strip target/aarch64-apple-darwin/release/odyn
@@ -81,7 +81,7 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        run: cross build --release --target aarch64-linux-android
+        run: ODYN_INSTALL_METHOD=release cross build --release --no-default-features --target aarch64-linux-android
       - name: Rename
         run: cp target/aarch64-linux-android/release/odyn odyn-android-aarch64
       - name: Upload to Codeberg release
@@ -108,7 +108,7 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        run: cross build --release --target armv7-linux-androideabi
+        run: ODYN_INSTALL_METHOD=release cross build --release --no-default-features --target armv7-linux-androideabi
       - name: Rename
         run: cp target/armv7-linux-androideabi/release/odyn odyn-android-armv7
       - name: Upload to Codeberg release
@@ -135,7 +135,7 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        run: cross build --release --target x86_64-linux-android
+        run: ODYN_INSTALL_METHOD=release cross build --release --no-default-features --target x86_64-linux-android
       - name: Rename
         run: cp target/x86_64-linux-android/release/odyn odyn-android-x86_64
       - name: Upload to Codeberg release
@@ -162,7 +162,7 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        run: cross build --release --target x86_64-unknown-netbsd
+        run: ODYN_INSTALL_METHOD=release cross build --release --no-default-features --target x86_64-unknown-netbsd
       - name: Strip
         run: strip target/x86_64-unknown-netbsd/release/odyn
       - name: Rename
@@ -191,7 +191,7 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        run: cross build --release --target x86_64-unknown-freebsd
+        run: ODYN_INSTALL_METHOD=release cross build --release --no-default-features --target x86_64-unknown-freebsd
       - name: Strip
         run: strip target/x86_64-unknown-freebsd/release/odyn
       - name: Rename
@@ -220,7 +220,7 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        run: cross build --release --target i686-unknown-freebsd
+        run: ODYN_INSTALL_METHOD=release cross build --release --no-default-features --target i686-unknown-freebsd
       - name: Strip
         run: strip target/i686-unknown-freebsd/release/odyn
       - name: Rename

@@ -8,6 +8,69 @@ slug: /getting-started
 
 Let's start using Odyn. Odyn's workflow is intentionally minimal. This page walks you through everything from project creation to importing a dependency in your Odin code.
 
+## Checking Odyn's Existence
+
+First, let's check if you actually installed Odyn properly.
+
+```sh
+odyn --version
+```
+
+This outputs the version of Odyn. Unlike most `--version` commands, Odyn is context-aware, which means it's different based on your machine. For example, if you installed on a Windows x86_64 machine, it would output the following:
+
+```
+Odyn vX.X.X Windows x86_64
+    Reproducible vendoring tool for the Odin programming language.
+```
+
+*Where `X.X.X` is your actual Odyn version.*
+
+<details>
+
+<summary>More Outputs</summary>
+
+Showcasing Odyn's context-aware version command.
+
+Generic:
+```
+Odyn vX.X.X <os> <arch>
+    Reproducible vendoring tool for the Odin programming language.
+```
+*Where `<os>` is your operating system (e.g Android, macOS, Linux) and `<arch>` is your architecture (e.g. x86_64, aarch64)*
+
+Installed from source:
+```
+Odyn vX.X.X Nightly, commit <hash>
+    Reproducible vendoring tool for the Odin programming language.
+```
+*Where `<hash>` is the git commit hash when you cloned from source.*
+
+Installed using Cargo:
+```
+Odyn vX.X.X Cargo Edition
+    Reproducible vendoring tool for the Odin programming language.
+```
+
+</details>
+
+If that works, then Odyn exists. You're good to go!
+
+<details>
+
+<summary>Advanced</summary>
+
+Party trick, you can trick Odyn's version output by setting an `ODYN_INSTALL_METHOD` environment variable.
+[The code](https://codeberg.org/razkar/odyn) checks the value of `ODYN_INSTALL_METHOD` and creates the output, it could either be:
+- `release`, which would check for your operating system and architecture.
+- `source`, which would output Nightly and the commit hash it was installed on.
+  + The hash is another environment variable, `ODYN_GIT_HASH`. From my testing, if you were already using this method, you can't modify the hash output by using the environment variable, for some reason.
+- `cargo`, outputs "Cargo Edition"
+
+All of the environment variables was actually set by Odyn under the hood, so you don't need to worry about setting an
+environment variable everytime you run `--version`. This trick is just editing the already set environment variables to your liking.
+
+</details>
+
 ## Initialize a Project
 ```sh
 odyn init myproject

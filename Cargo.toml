@@ -1,7 +1,8 @@
 [package]
 name = "odyn"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
+build = "build.rs"
 description = "Reproducible vendoring for Odin. Not a package manager."
 license = "MIT OR Apache-2.0"
 repository = "https://codeberg.org/razkar/odyn"
@@ -18,3 +19,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 sha2 = "0.11.0"
 toml = "1.1.0"
 ureq = "3.3.0"
+
+[features]
+cargo-install = []
+default = ["cargo-install"]

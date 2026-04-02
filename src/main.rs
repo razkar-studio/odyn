@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand};
 use ui::{init_styles, status};
 
 use crate::commands::{
-    cmd_get, cmd_init, cmd_remove, cmd_status, cmd_sync, cmd_update, cmd_update_self,
+    cmd_get, cmd_init, cmd_remove, cmd_status, cmd_sync, cmd_update, cmd_update_self, cmd_version,
 };
 
 /// Odyn: reproducible vendoring for Odin projects.
@@ -16,10 +16,18 @@ use crate::commands::{
 /// Manages dependencies by cloning Git repositories into `odyn_deps/`
 /// and pinning exact commits in `Odyn.lock`.
 #[derive(Parser)]
-#[command(name = "odyn", about = "Reproducible vendoring for Odin projects")]
+#[command(
+    name = "odyn",
+    about = "Reproducible vendoring for Odin projects",
+    disable_version_flag = true,
+    arg_required_else_help = true
+)]
 struct Cli {
+    #[arg(long, short = 'V', action = clap::ArgAction::SetTrue)]
+    version: bool,
+
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
 }
 
 #[derive(Subcommand)]
@@ -125,6 +133,11 @@ fn main() {
     init_styles();
     let cli = Cli::parse();
 
+    if cli.version {
+        cmd_version();
+        return;
+    }
+
     if let Err(e) = run(cli) {
         status("Error", "error", &e.to_string());
         std::process::exit(1);
@@ -133,47 +146,50 @@ fn main() {
 
 fn run(cli: Cli) -> anyhow::Result<()> {
     match cli.command {
-        Commands::Get {
-            source,
-            name,
-            platform,
-            commit,
-        } => {
-            status("Getting", "load", &format!("'{source}'"));
-            cmd_get(source, name, platform, commit)?;
-            status("Done", "success", "dependency added");
-        }
-        Commands::Init {
-            project_name,
-            license,
-            with_readme,
-            no_src,
-        } => {
-            status(
-                "Creating",
-                "load",
-                &format!("odin project '{project_name}'"),
-            );
-            cmd_init(project_name.clone(), license, with_readme, no_src)?;
-            status("Created", "success", &format!("'{project_name}'"));
-        }
-        Commands::Sync { force, skip } => {
-            cmd_sync(force, skip)?;
-        }
-        Commands::Remove { name } => {
-            status("Removing", "load", &format!("'{name}'"));
-            cmd_remove(name)?;
-            status("Removed", "success", "dependency removed");
-        }
-        Commands::Update { name } => {
-            cmd_update(name)?;
-        }
-        Commands::UpdateSelf => {
-            cmd_update_self()?;
-        }
-        Commands::Status => {
-            cmd_status()?;
-        }
+        Some(command) => match command {
+            Commands::Get {
+                source,
+                name,
+                platform,
+                commit,
+            } => {
+                status("Getting", "load", &format!("'{source}'"));
+                cmd_get(source, name, platform, commit)?;
+                status("Done", "success", "dependency added");
+            }
+            Commands::Init {
+                project_name,
+                license,
+                with_readme,
+                no_src,
+            } => {
+                status(
+                    "Creating",
+                    "load",
+                    &format!("odin project '{project_name}'"),
+                );
+                cmd_init(project_name.clone(), license, with_readme, no_src)?;
+                status("Created", "success", &format!("'{project_name}'"));
+            }
+            Commands::Sync { force, skip } => {
+                cmd_sync(force, skip)?;
+            }
+            Commands::Remove { name } => {
+                status("Removing", "load", &format!("'{name}'"));
+                cmd_remove(name)?;
+                status("Removed", "success", "dependency removed");
+            }
+            Commands::Update { name } => {
+                cmd_update(name)?;
+            }
+            Commands::UpdateSelf => {
+                cmd_update_self()?;
+            }
+            Commands::Status => {
+                cmd_status()?;
+            }
+        },
+        None => unreachable!(),
     }
     Ok(())
 }

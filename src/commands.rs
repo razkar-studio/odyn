@@ -12,7 +12,7 @@ use crate::{
     ui::status,
 };
 use anyhow::{Result, anyhow};
-use farben::ceprintln;
+use farben::{ceprintln, cprintln};
 use sha2::{Digest, Sha256};
 
 fn short(commit: &str) -> &str {
@@ -39,6 +39,40 @@ fn git_head(dep_path: &PathBuf) -> Result<String> {
         .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?
         .trim()
         .to_string())
+}
+
+pub(crate) fn cmd_version() {
+    let extra = match env!("ODYN_INSTALL_METHOD") {
+        "cargo" => "[ansi(173)]Cargo Edition".to_string(),
+        "source" => {
+            let res = "[ansi(62)]Nightly".to_string();
+            match option_env!("ODYN_GIT_HASH") {
+                None => res,
+                Some(hash) => {
+                    let mut res = res;
+                    res.push_str(&format!("[/ansi(62)], commit {hash}"));
+                    res
+                }
+            }
+        }
+        "release" => {
+            let mut res = String::from("");
+            res.push_str(match std::env::consts::OS {
+                "linux" => "[yellow]Linux [/yellow]",
+                "windows" => "[blue]Windows [/blue]",
+                "macos" => "[ansi(250)]macOS [/ansi(250)]",
+                "android" => "[green]Android [/green]",
+                "freebsd" => "[bright-red]FreeBSD [/bright-red]",
+                "netbsd" => "[ansi(214)]NetBSD [/ansi(214)]",
+                other => other,
+            });
+            res.push_str(std::env::consts::ARCH);
+            res
+        }
+        _ => "".to_string(),
+    };
+    cprintln!("[bold blue]Odyn[/blue] v{VERSION} {extra}");
+    println!("    Reproducible vendoring tool for the Odin programming language.");
 }
 
 pub(crate) fn cmd_init(

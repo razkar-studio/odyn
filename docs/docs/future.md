@@ -21,9 +21,9 @@ A checklist of thoughts for the future of Odyn.
 ## Additions
 - [ ] `run`: resolves to `odin run src -collections:deps=odyn_deps` where `src` could be `.` depending if it exists or not
   + [ ] `run`: needs odin compiler though?
-- [ ] `init`: `migrate`, adds an `ols.json` entry for `deps`, an empty `Odyn.lock`, and an empty `odyn_deps/` directory in an existing project.
-- [ ] `--version`: why haven't this been added???
-  + [ ] `--version`: (optionally) platform-specific, (and maybe) install-method-specific message
+- [ ] `init`: `--migrate`, adds an `ols.json` entry for `deps`, an empty `Odyn.lock`, and an empty `odyn_deps/` directory in an existing project.
+- [x] `--version`: why haven't this been added??? (update: it's added)
+  + [x] `--version`: (optionally) platform-specific, (and maybe) install-method-specific message
 
 ## Probably
 - [ ] `odin [--version]`: installs the odin compiler on your machine (probably not?)
