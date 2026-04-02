@@ -6,8 +6,15 @@
 
 [![License MIT](https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue?style=flat-square)](https://codeberg.org/razkar/odyn/src/branch/main/LICENSE-MIT)
 [![Built with Rust](https://img.shields.io/badge/built%20with-Rust-orange?style=flat-square&logo=rust)](https://www.rust-lang.org/)
+[![MSRV](https://img.shields.io/badge/rustc-1.85%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org/)
 [![Codeberg](https://img.shields.io/badge/codeberg-razkar%2Fodyn-blue?style=flat-square&logo=codeberg)](https://codeberg.org/razkar/odyn)
+[![Latest Release](https://img.shields.io/gitea/v/release/razkar/odyn?gitea_url=https%3A%2F%2Fcodeberg.org&style=flat-square&logo=codeberg)](https://codeberg.org/razkar/odyn/releases)
 [![Last Commit](https://img.shields.io/gitea/last-commit/razkar/odyn?gitea_url=https%3A%2F%2Fcodeberg.org&style=flat-square)](https://codeberg.org/razkar/odyn/commits/branch/main)
+[![Stars](https://img.shields.io/gitea/stars/razkar/odyn?gitea_url=https%3A%2F%2Fcodeberg.org&style=flat-square)](https://codeberg.org/razkar/odyn)
+[![Open Issues](https://img.shields.io/gitea/issues/open/razkar/odyn?gitea_url=https%3A%2F%2Fcodeberg.org&style=flat-square)](https://codeberg.org/razkar/odyn/issues)
+[![Crates.io](https://img.shields.io/crates/v/odyn?style=flat-square&logo=rust)](https://crates.io/crates/odyn)
+[![Crates.io Downloads](https://img.shields.io/crates/d/odyn?style=flat-square&logo=rust&label=installs)](https://crates.io/crates/odyn)
+[![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20FreeBSD%20%7C%20NetBSD%20%7C%20Android-informational?style=flat-square)](https://codeberg.org/razkar/odyn/releases)
 
 </div>
 
