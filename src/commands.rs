@@ -200,10 +200,20 @@ pub(crate) fn cmd_init(
     Ok(())
 }
 
-pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
+pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool, force_stable: bool) -> Result<()> {
     if pre_release && nightly {
         return Err(anyhow!(
             "--pre-release and --nightly cannot be used together"
+        ));
+    }
+    if pre_release && force_stable {
+        return Err(anyhow!(
+            "--pre-release and --force-stable cannot be used together"
+        ));
+    }
+    if nightly && force_stable {
+        return Err(anyhow!(
+            "--nightly and --force-stable cannot be used together"
         ));
     }
 
@@ -216,7 +226,7 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
             .ok()
             .and_then(|mut r| r.body_mut().read_to_string().ok())
             .and_then(|body| {
-                body.split("\"sha\":")
+                body.split("\"id\":")
                     .nth(1)?
                     .trim_start_matches([' ', '\t'])
                     .strip_prefix('"')?
@@ -383,7 +393,7 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
         return Ok(());
     }
 
-    if !pre_release && !nightly && version_cmp(VERSION, latest).is_gt() {
+    if !pre_release && !nightly && !force_stable && version_cmp(VERSION, latest).is_gt() {
         status(
             "Newer",
             "warn",

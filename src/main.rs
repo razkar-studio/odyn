@@ -116,6 +116,10 @@ enum Commands {
         /// Update to the latest nightly build.
         #[arg(long)]
         nightly: bool,
+
+        /// Force update to the latest stable release, even if the local version is newer.
+        #[arg(long)]
+        force_stable: bool,
     },
 
     /// Print version information.
@@ -202,8 +206,9 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             Commands::UpdateSelf {
                 pre_release,
                 nightly,
+                force_stable,
             } => {
-                cmd_update_self(pre_release, nightly)?;
+                cmd_update_self(pre_release, nightly, force_stable)?;
             }
             Commands::Status => {
                 cmd_status()?;
