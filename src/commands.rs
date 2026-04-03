@@ -6,12 +6,12 @@ use crate::{
         MIT_LICENSE, MPL2_LICENSE, OLS_JSON, UNLICENSE, VERSION, ZLIB_LICENSE,
     },
     storage::{
-        Dep, DepState, Lockfile, check_git, gen_main_odin, load_lockfile, save_lockfile,
-        save_lockfile_at,
+        check_git, gen_main_odin, load_lockfile, save_lockfile, save_lockfile_at, Dep, DepState,
+        Lockfile,
     },
     ui::status,
 };
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use farben::{ceprintln, cprintln};
 use sha2::{Digest, Sha256};
 
@@ -233,6 +233,12 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
         );
 
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
+        let temp_root = std::env::temp_dir().join("odyn-nightly-build");
+        if temp_root.exists() {
+            std::fs::remove_dir_all(&temp_root).ok();
+        }
+        std::fs::create_dir_all(&temp_root)?;
+
         let exit = std::process::Command::new(&cargo)
             .args([
                 "install",
@@ -240,13 +246,58 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
                 "https://codeberg.org/razkar/odyn.git",
                 "--force",
                 "--no-default-features",
+                "--root",
             ])
+            .arg(&temp_root)
             .env("ODYN_INSTALL_METHOD", "source")
             .status()
             .map_err(|e| anyhow!("failed to run cargo: {e}"))?;
 
         if !exit.success() {
             return Err(anyhow!("cargo install failed"));
+        }
+
+        #[cfg(target_os = "windows")]
+        let built_binary = temp_root.join("bin").join("odyn.exe");
+        #[cfg(not(target_os = "windows"))]
+        let built_binary = temp_root.join("bin").join("odyn");
+
+        if !built_binary.exists() {
+            return Err(anyhow!(
+                "built binary not found at {}",
+                built_binary.display()
+            ));
+        }
+
+        let current_exe = std::env::current_exe()?;
+
+        #[cfg(target_os = "windows")]
+        {
+            let old_path = current_exe.with_extension("exe.old");
+            if let Err(e) = std::fs::rename(&current_exe, &old_path) {
+                std::fs::remove_dir_all(&temp_root).ok();
+                return Err(anyhow!("failed to rename current binary: {e}"));
+            }
+            if let Err(e) = std::fs::copy(&built_binary, &current_exe) {
+                std::fs::rename(&old_path, &current_exe).ok();
+                std::fs::remove_dir_all(&temp_root).ok();
+                return Err(anyhow!("failed to install new binary: {e}"));
+            }
+            std::fs::remove_dir_all(&temp_root).ok();
+            std::fs::remove_file(&old_path).ok();
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            if let Err(e) = std::fs::remove_file(&current_exe) {
+                std::fs::remove_dir_all(&temp_root).ok();
+                return Err(anyhow!("failed to remove current binary: {e}"));
+            }
+            if let Err(e) = std::fs::copy(&built_binary, &current_exe) {
+                std::fs::remove_dir_all(&temp_root).ok();
+                return Err(anyhow!("failed to install new binary: {e}"));
+            }
+            std::fs::remove_dir_all(&temp_root).ok();
         }
 
         status(
