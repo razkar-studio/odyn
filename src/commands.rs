@@ -75,12 +75,12 @@ pub(crate) fn cmd_version(verbose: bool) {
         "release" => {
             let mut res = String::from("");
             res.push_str(match std::env::consts::OS {
-                "linux" => "[yellow]Linux [/yellow]",
-                "windows" => "[blue]Windows [/blue]",
-                "macos" => "[ansi(250)]macOS [/ansi(250)]",
-                "android" => "[green]Android [/green]",
-                "freebsd" => "[bright-red]FreeBSD [/bright-red]",
-                "netbsd" => "[ansi(214)]NetBSD [/ansi(214)]",
+                "linux" => "[yellow]Linux[/yellow]",
+                "windows" => "[blue]Windows[/blue]",
+                "macos" => "[ansi(250)]macOS[/ansi(250)]",
+                "android" => "[green]Android[/green]",
+                "freebsd" => "[bright-red]FreeBSD[/bright-red]",
+                "netbsd" => "[ansi(214)]NetBSD[/ansi(214)]",
                 other => other,
             });
             res.push(' ');
