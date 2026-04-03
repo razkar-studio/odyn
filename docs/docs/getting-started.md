@@ -55,22 +55,6 @@ Odyn vX.X.X Cargo Edition
 
 If that works, then Odyn exists. You're good to go!
 
-<details>
-
-<summary>Advanced</summary>
-
-Party trick, you can trick Odyn's version output by setting an `ODYN_INSTALL_METHOD` environment variable.
-[The code](https://codeberg.org/razkar/odyn) checks the value of `ODYN_INSTALL_METHOD` and creates the output, it could either be:
-- `release`, which would check for your operating system and architecture.
-- `source`, which would output Nightly and the commit hash it was installed on.
-  + The hash is another environment variable, `ODYN_GIT_HASH`. From my testing, if you were already using this method, you can't modify the hash output by using the environment variable, for some reason.
-- `cargo`, outputs "Cargo Edition"
-
-All of the environment variables was actually set by Odyn under the hood, so you don't need to worry about setting an
-environment variable everytime you run `--version`. This trick is just editing the already set environment variables to your liking.
-
-</details>
-
 ## Initialize a Project
 ```sh
 odyn init myproject

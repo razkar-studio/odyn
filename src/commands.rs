@@ -24,6 +24,23 @@ fn short(commit: &str) -> &str {
     &commit[..end]
 }
 
+pub(crate) fn parse_version(s: &str) -> (u32, u32, u32) {
+    let s = s.trim_start_matches('v');
+    let parts: Vec<u32> = s.split('.').filter_map(|p| p.parse().ok()).collect();
+    match parts.as_slice() {
+        [major, minor, patch, ..] => (*major, *minor, *patch),
+        [major, minor] => (*major, *minor, 0),
+        [major] => (*major, 0, 0),
+        _ => (0, 0, 0),
+    }
+}
+
+pub(crate) fn version_cmp(a: &str, b: &str) -> std::cmp::Ordering {
+    let (a_major, a_minor, a_patch) = parse_version(a);
+    let (b_major, b_minor, b_patch) = parse_version(b);
+    (a_major, a_minor, a_patch).cmp(&(b_major, b_minor, b_patch))
+}
+
 fn git_head(dep_path: &PathBuf) -> Result<String> {
     let output = std::process::Command::new("git")
         .args(["rev-parse", "HEAD"])
@@ -66,6 +83,7 @@ pub(crate) fn cmd_version(verbose: bool) {
                 "netbsd" => "[ansi(214)]NetBSD [/ansi(214)]",
                 other => other,
             });
+            res.push(' ');
             res.push_str(std::env::consts::ARCH);
             res
         }
@@ -110,15 +128,32 @@ pub(crate) fn cmd_init(
         if deps_dir.exists() {
             return Err(anyhow!("'{}' already exists", DEPS_DIR));
         }
-        if ols.exists() {
-            return Err(anyhow!("'ols.json' already exists"));
-        }
         if lockfile.exists() {
             return Err(anyhow!("'Odyn.lock' already exists"));
         }
 
         std::fs::create_dir_all(&deps_dir)?;
-        std::fs::write(&ols, OLS_JSON)?;
+
+        if ols.exists() {
+            let content = std::fs::read_to_string(&ols)?;
+            let mut json: serde_json::Value = serde_json::from_str(&content)
+                .map_err(|e| anyhow!("failed to parse ols.json: {e}"))?;
+            let collections = json
+                .get_mut("collections")
+                .and_then(|v| v.as_array_mut())
+                .ok_or_else(|| anyhow!("ols.json has no 'collections' array"))?;
+            if collections
+                .iter()
+                .any(|e| e.get("name").and_then(|n| n.as_str()) == Some("deps"))
+            {
+                return Err(anyhow!("ols.json already has a 'deps' collection"));
+            }
+            collections.push(serde_json::json!({ "name": "deps", "path": "odyn_deps" }));
+            std::fs::write(&ols, serde_json::to_string_pretty(&json)?)?;
+        } else {
+            std::fs::write(&ols, OLS_JSON)?;
+        }
+
         save_lockfile_at(&Lockfile { dep: Vec::new() }, &PathBuf::from("."))?;
 
         return Ok(());
@@ -167,37 +202,42 @@ pub(crate) fn cmd_init(
 
 pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
     if pre_release && nightly {
-        return Err(anyhow!("--pre-release and --nightly cannot be used together"));
+        return Err(anyhow!(
+            "--pre-release and --nightly cannot be used together"
+        ));
     }
 
     let os = std::env::consts::OS;
     let arch = std::env::consts::ARCH;
 
     if nightly {
-        let commit = ureq::get(
-            "https://codeberg.org/api/v1/repos/razkar/odyn/branches/main",
-        )
-        .call()
-        .ok()
-        .and_then(|mut r| r.body_mut().read_to_string().ok())
-        .and_then(|body| {
-            body.split("\"sha\":")
-                .nth(1)?
-                .trim_start_matches([' ', '\t'])
-                .strip_prefix('"')?
-                .split('"')
-                .next()
-                .map(|s| s[..8].to_string())
-        })
-        .unwrap_or_else(|| "unknown".to_string());
+        let commit = ureq::get("https://codeberg.org/api/v1/repos/razkar/odyn/branches/main")
+            .call()
+            .ok()
+            .and_then(|mut r| r.body_mut().read_to_string().ok())
+            .and_then(|body| {
+                body.split("\"sha\":")
+                    .nth(1)?
+                    .trim_start_matches([' ', '\t'])
+                    .strip_prefix('"')?
+                    .split('"')
+                    .next()
+                    .map(|s| s[..8].to_string())
+            })
+            .unwrap_or_else(|| "unknown".to_string());
 
-        status("Nightly", "load", &format!("building from commit {commit}..."));
+        status(
+            "Nightly",
+            "load",
+            &format!("building from commit {commit}..."),
+        );
 
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let exit = std::process::Command::new(&cargo)
             .args([
                 "install",
-                "--git", "https://codeberg.org/razkar/odyn.git",
+                "--git",
+                "https://codeberg.org/razkar/odyn.git",
                 "--force",
                 "--no-default-features",
             ])
@@ -209,7 +249,11 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
             return Err(anyhow!("cargo install failed"));
         }
 
-        status("Updated", "success", &format!("odyn nightly installed (commit {commit})"));
+        status(
+            "Updated",
+            "success",
+            &format!("odyn nightly installed (commit {commit})"),
+        );
         return Ok(());
     }
 
@@ -288,7 +332,7 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
         return Ok(());
     }
 
-    if !pre_release && !nightly && VERSION > latest {
+    if !pre_release && !nightly && version_cmp(VERSION, latest).is_gt() {
         status(
             "Newer",
             "warn",
@@ -402,7 +446,9 @@ pub(crate) fn cmd_remove(name: String) -> Result<()> {
     }
 
     let dep_path = PathBuf::from(DEPS_DIR).join(&name);
-    std::fs::remove_dir_all(&dep_path)?;
+    if dep_path.exists() {
+        std::fs::remove_dir_all(&dep_path)?;
+    }
 
     lockfile.dep.retain(|d| d.name != name);
 
@@ -716,6 +762,12 @@ pub(crate) fn cmd_get(
         return Ok(());
     }
 
+    if lockfile.dep.iter().any(|dep| dep.name == name) {
+        return Err(anyhow!(
+            "a dependency named '{name}' already exists in Odyn.lock, try using a custom name and prefix the author"
+        ));
+    }
+
     let dep_path = PathBuf::from(DEPS_DIR).join(&name);
 
     std::fs::create_dir_all(PathBuf::from(DEPS_DIR))?;
@@ -745,7 +797,13 @@ pub(crate) fn cmd_get(
                     "failed to checkout commit '{c}'. maybe it was a typo? (partial clone removed)"
                 ));
             }
-            c
+            match git_head(&dep_path) {
+                Ok(c) => c,
+                Err(e) => {
+                    std::fs::remove_dir_all(&dep_path).ok();
+                    return Err(anyhow!("failed to resolve HEAD after checkout: {e}"));
+                }
+            }
         }
         None => match git_head(&dep_path) {
             Ok(c) => c,
@@ -762,7 +820,6 @@ pub(crate) fn cmd_get(
         commit,
     });
 
-    // Bug 12: clean up cloned directory if lockfile save fails
     if let Err(e) = save_lockfile(&lockfile) {
         std::fs::remove_dir_all(&dep_path).ok();
         return Err(anyhow!(
@@ -771,4 +828,52 @@ pub(crate) fn cmd_get(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_version() {
+        assert_eq!(parse_version("1.0.0"), (1, 0, 0));
+        assert_eq!(parse_version("v1.0.0"), (1, 0, 0));
+        assert_eq!(parse_version("1.2.3"), (1, 2, 3));
+        assert_eq!(parse_version("v2"), (2, 0, 0));
+        assert_eq!(parse_version("3"), (3, 0, 0));
+        assert_eq!(parse_version(""), (0, 0, 0));
+        assert_eq!(parse_version("abc"), (0, 0, 0));
+        assert_eq!(parse_version("1.2.3.4"), (1, 2, 3));
+    }
+
+    #[test]
+    fn test_version_cmp() {
+        assert_eq!(version_cmp("1.0.0", "1.0.0"), std::cmp::Ordering::Equal);
+        assert_eq!(version_cmp("1.0.0", "2.0.0"), std::cmp::Ordering::Less);
+        assert_eq!(version_cmp("2.0.0", "1.0.0"), std::cmp::Ordering::Greater);
+        assert_eq!(version_cmp("1.0.0", "1.1.0"), std::cmp::Ordering::Less);
+        assert_eq!(version_cmp("1.1.0", "1.0.0"), std::cmp::Ordering::Greater);
+        assert_eq!(version_cmp("1.0.0", "1.0.1"), std::cmp::Ordering::Less);
+        assert_eq!(version_cmp("1.0.1", "1.0.0"), std::cmp::Ordering::Greater);
+        assert_eq!(version_cmp("0.3.0", "0.10.0"), std::cmp::Ordering::Less);
+        assert_eq!(version_cmp("v1.0.0", "v2.0.0"), std::cmp::Ordering::Less);
+        assert_eq!(version_cmp("10.0.0", "9.0.0"), std::cmp::Ordering::Greater);
+    }
+
+    #[test]
+    fn test_gen_main_odin() {
+        let result = gen_main_odin("myproject");
+        assert!(result.contains("package main"));
+        assert!(result.contains("Hellope, myproject!"));
+        let result2 = gen_main_odin("test");
+        assert!(result2.contains("Hellope, test!"));
+    }
+
+    #[test]
+    fn test_short() {
+        assert_eq!(short("abcd1234efgh5678"), "abcd123");
+        assert_eq!(short("abc"), "abc");
+        assert_eq!(short(""), "");
+        assert_eq!(short("1234567890abcdef"), "1234567");
+    }
 }

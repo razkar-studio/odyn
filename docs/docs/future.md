@@ -15,8 +15,8 @@ A checklist of thoughts for the future of Odyn.
 - [ ] `get`: `sync`-ing inside dependencies if `Odyn.lock` exists inside it
 - [ ] fixing possible bugs
 - [x] adding bugs
-- [ ] `update-self`: `--pre-release` queries the latest release of Odyn regardless of stability
-- [ ] `update-self`: `--nightly` queries the latest *commit* of Odyn
+- [x] `update-self`: `--pre-release` queries the latest release of Odyn regardless of stability
+- [x] `update-self`: `--nightly` queries the latest *commit* of Odyn
 
 ## Additions
 - [ ] `run`: resolves to `odin run src -collections:deps=odyn_deps` where `src` could be `.` depending if it exists or not

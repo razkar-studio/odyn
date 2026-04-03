@@ -2,7 +2,30 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
-## [0.3.0] - Unreleased
+## [0.3.0] - 2026-04-03
+
+### Added
+
+- `odyn get` now errors immediately if a dependency with the same name already exists in `Odyn.lock`, with a message suggesting a custom name
+- `parse_version` and `version_cmp` — proper numeric semver comparison, replacing the old string comparison in `update-self`
+- Unit tests for `parse_version`, `version_cmp`, `gen_main_odin`, and `short` in `commands.rs`
+- Unit tests for lockfile serialization, deserialization, and `DepState` variants in `storage.rs`
+- `Cross.toml` — cross-compilation configuration for the release binary matrix
+- FAQ page in the documentation site
+
+### Fixed
+
+- `update-self` version comparison now uses semver ordering — `0.9.0` is no longer treated as newer than `0.10.0`
+- `odyn get --commit`: the stored commit hash is now read from `git rev-parse HEAD` after checkout instead of using the raw input string, ensuring the full 40-character hash is always written to `Odyn.lock`
+- `odyn get`: the cloned directory is now cleaned up if HEAD resolution fails after a `--commit` checkout
+- `odyn remove` no longer errors when the dependency directory does not exist on disk
+- `odyn version`: fixed a missing space between the OS name and architecture in the version string
+
+### Changed
+
+- CLI `--help` text trimmed down for conciseness across all subcommands
+
+## [0.3.0-rc] - 2026-04-02
 
 ### Added
 

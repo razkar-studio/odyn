@@ -1,0 +1,385 @@
+---
+id: faq
+title: Frequently Asked Questions
+description: Answers to common questions about Odyn
+sidebar_position: 7
+slug: /faq
+---
+
+import styles from './faq.module.css';
+
+export function Q({ q, children }) {
+  return (
+    <details className={styles.entry}>
+      <summary>{q}</summary>
+      <div className={styles.answer}>{children}</div>
+    </details>
+  );
+}
+
+This page answers the most common questions about Odyn, what it is, what it is not, and how it fits into an Odin project. If something is not covered here, feel free to open an issue on the [Codeberg repository](https://codeberg.org/razkar/odyn/issues).
+
+## About Odyn
+
+<div className={styles.section}>
+
+<Q q="What is Odyn?">
+
+Odyn is a reproducible vendoring tool for the [Odin programming language](https://odin-lang.org/). It clones Git repositories into an `odyn_deps/` directory and records each dependency's exact commit hash in a lockfile called `Odyn.lock`. Running `odyn sync` on any machine, at any point in the future, restores every dependency to the exact commit recorded in that lockfile.
+
+That is the full scope of what Odyn does. It has no registry, no account system, no solver, and no opinion on what a package should look like.
+
+</Q>
+
+<Q q="Is Odyn a package manager?">
+
+**No. Odyn is not a package manager and it will never become one.**
+
+The creator of Odin, *gingerBill*, has written about why package managers are harmful to a language ecosystem. The core of the argument is that automating dependency resolution does not eliminate dependency problems, it accelerates them. Package managers also introduce competing definitions of what a "package" is, which historically leads to the need for package-manager-managers and other layers of abstraction on top of abstraction.
+
+The practical alternative he advocates for is copying and vendoring each dependency manually and fixing the specific version down. That is precisely what Odyn automates. Nothing more.
+
+If you are expecting npm, Cargo, or pip behavior, Odyn will disappoint you. That is a feature, not a bug.
+
+For more information, I recommend you to [read his blog](https://www.gingerbill.org/article/2025/09/08/package-managers-are-evil/).
+
+</Q>
+
+<Q q="So what exactly does Odyn do?">
+
+Odyn automates a workflow you could do by hand:
+
+1. Clone a git repository into your project's `odyn_deps/` folder.
+2. Record the current commit hash somewhere so you can reproduce the same state later.
+3. Re-clone or reset each dependency to that recorded hash when needed.
+
+That is it. The workflow is transparent. You can inspect `Odyn.lock` directly. You can see every dependency and every pinned commit at a glance. There is no hidden resolver state, no dependency graph, and no network requests beyond plain git operations.
+
+</Q>
+
+<Q q="Why is Odyn written in Rust?">
+
+Cross-compilation. Rust's `cross` tool makes it straightforward to build a wide binary matrix from a single host, and Odyn ships pre-built binaries for Linux, macOS, Windows, FreeBSD, NetBSD, and Android across multiple architectures. Pre-built binaries are the recommended install path because they require no toolchain on the user's machine beyond Git itself.
+
+Odin could absolutely do it, and an Odin rewrite would not eliminate the cross-compilation story from the release pipeline. However until there is a clear reason to switch, Rust stays.
+
+</Q>
+
+<Q q="Will Odyn be rewritten in Odin?">
+
+Maybe, but it is not planned. The question comes up often enough to be worth addressing directly. Odyn being written in Rust does not make it less useful for Odin projects. The tool installs as a single binary. The only runtime dependency is Git. The implementation language is largely invisible to the person using it.
+
+If an Odin rewrite happens, it will be because it solves a concrete problem. It will not happen just to make the tooling stack more uniform.
+
+</Q>
+
+</div>
+
+## Installation and Setup
+
+<div className={styles.section}>
+
+<Q q="What are the requirements for running Odyn?">
+
+Git must be available in your `PATH`, or placed in the same directory as the Odyn binary. That is the only requirement. Odyn itself is a single statically-linked binary on most platforms.
+
+</Q>
+
+<Q q="What platforms does Odyn support?">
+
+Odyn ships pre-built binaries for:
+
+- Linux (x86_64, aarch64, armv7, and more, both glibc and musl variants)
+- macOS (x86_64, Apple Silicon aarch64)
+- Windows (x86_64, aarch64)
+- FreeBSD (x86_64)
+- NetBSD (x86_64)
+- Android via Termux (aarch64)
+
+The full architecture table is listed in [MORE.md](https://codeberg.org/razkar/odyn/src/branch/main/MORE.md) in the repository.
+
+</Q>
+
+<Q q="Can I build Odyn from source?">
+
+Yes. You need Rust 1.85 or newer. Clone the repository, run `cargo build --release`, and the binary lands at `target/release/odyn`. You can also install directly from crates.io with `cargo install odyn`.
+
+</Q>
+
+<Q q="Can I use Odyn with a project that was not initialized with `odyn init`?">
+
+Yes. `odyn init` is a convenience command that creates a project skeleton. It is not required. You can use `odyn get` in any directory that has an `Odyn.lock` file, or create an empty `Odyn.lock` yourself. The lockfile format is plain TOML and is documented in the [lockfile section of the concepts page](/docs/concepts).
+
+The main thing you miss without `odyn init` is the pre-configured `ols.json`. You can add that manually if you want editor autocomplete to work with the `deps` collection.
+
+If you have an existing Odin project, `odyn init --migrate` handles this for you. It adds `odyn_deps/`, the `deps` entry to `ols.json`, and an empty `Odyn.lock` in place without touching anything else.
+
+</Q>
+
+</div>
+
+## Dependencies and the Lockfile
+
+<div className={styles.section}>
+
+<Q q="What does Odyn.lock look like?">
+
+Each entry in the lockfile looks like this:
+
+```toml
+[[dep]]
+name = "math"
+source = "https://github.com/odin-community/math"
+commit = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+```
+
+Every dependency has a name, the full URL of the source repository, and the exact commit hash that was recorded when you ran `odyn get` or `odyn update`. The file is auto-generated, but it is plain text and completely human-readable.
+
+</Q>
+
+<Q q="Should I commit Odyn.lock?">
+
+Yes, always commit `Odyn.lock`. The lockfile is what makes `odyn sync` reproducible. Without it, there is no record of which commits your project depends on, and `odyn sync` cannot restore anything.
+
+</Q>
+
+<Q q="Should I commit odyn_deps/?">
+
+That is your choice. Gitignoring `odyn_deps/` is the common approach because the directory is fully reproducible from the lockfile at any time. Committing it is also valid if you want everything self-contained, or if you are worried about upstream repositories becoming unavailable. If a repo is deleted or made private after you pinned it, the lockfile will not help you restore it unless you also have the actual files somewhere.
+
+</Q>
+
+<Q q="What happens if a dependency repository is deleted or made private?">
+
+Odyn cannot clone a repository it cannot reach. If the upstream disappears and you have not committed `odyn_deps/`, the contents of that dependency are gone from your workflow. This is one of the stronger arguments for committing `odyn_deps/` despite it being redundant most of the time. The lockfile preserves the intent; the directory preserves the content.
+
+</Q>
+
+<Q q="Can I pin a specific commit rather than HEAD?">
+
+Yes. Pass `--commit <hash>` to `odyn get`:
+
+```sh
+odyn get odin-community/math --commit a1b2c3d4
+```
+
+Odyn will clone the repository and record that specific commit in the lockfile rather than whatever HEAD is at the time.
+
+</Q>
+
+<Q q="Can I pin to a branch or tag?">
+
+Odyn pins to commit hashes, not branch names or tags. This is intentional. Branch names and tags are mutable references. A branch can move, a tag can be force-pushed, and your "pinned" version would silently change. Pinning to a commit hash guarantees the exact state is preserved forever, regardless of what the upstream does to its branches or tags.
+
+If you want to track a specific release, find the commit hash that tag points to and pin that.
+
+</Q>
+
+<Q q="Does Odyn support transitive dependencies?">
+
+No. If a library you depend on has its own dependencies, Odyn does not automatically fetch those. You add them explicitly with `odyn get`. This is a deliberate design choice. Transitive dependency resolution is where most package manager complexity lives. By requiring you to declare every dependency yourself, Odyn keeps the dependency graph flat, visible, and under your control.
+
+</Q>
+
+<Q q="What is the difference between odyn sync and odyn update?">
+
+They do opposite things in terms of intention.
+
+`odyn sync` makes reality match the lockfile. It re-clones any missing dependency and errors if a dependency has been locally modified. It does not fetch new commits from upstream. It is a restore operation.
+
+`odyn update <name>` pulls the latest commit for a specific dependency from upstream and re-pins it in the lockfile. It is a deliberate upgrade operation. After running it, you should re-run `odyn sync` to confirm everything is clean.
+
+Think of `odyn sync` as "give me exactly what the lockfile says" and `odyn update` as "advance this dependency to its current HEAD and record the new hash."
+
+</Q>
+
+<Q q="How do I update all dependencies at once?">
+
+There is no single command to update every dependency at once for now. Batch updates hide what actually changed. If something breaks after updating, you want to know which dependency caused it. Updating one at a time, reviewing the change, and committing makes the history meaningful.
+
+If you want to update everything, loop over the names listed in your lockfile and run `odyn update` for each one.
+
+</Q>
+
+</div>
+
+## Commands and Behavior
+
+<div className={styles.section}>
+
+<Q q="Why does odyn sync error when a dependency has been locally modified?">
+
+Odyn treats a modified dependency as a potential problem. You may have made changes you want to keep, and silently overwriting them would be destructive. `odyn sync` stops and tells you which dependency is in an unexpected state so you can decide what to do.
+
+If you want Odyn to reset modified dependencies to their pinned commits, pass `--force`:
+
+```sh
+odyn sync --force
+```
+
+That will discard any local changes and restore the pinned state. Use it deliberately.
+
+Or, if you want to skip a dependency you intentionally modified, pass `--skip <name>`:
+
+```sh
+odyn sync --skip math
+```
+
+This will make `odyn sync` skip checking that dependency altogether.
+
+</Q>
+
+<Q q="What does odyn status do?">
+
+`odyn status` checks each dependency listed in `Odyn.lock` against what is on disk and reports one of three states: ok, missing, or modified. It exits with a non-zero code if anything is wrong, which makes it useful in CI to verify the working tree is clean before a build.
+
+</Q>
+
+<Q q="What platforms does update-self work on?">
+
+`update-self` works on standard glibc Linux, macOS, and Windows binaries. It does not work on musl variants, powerpc64 (big endian), or ARMv6 builds. For those platforms, install updates manually from the Releases page. The command will tell you if your build does not support self-update.
+
+</Q>
+
+<Q q="What platforms does odyn get support?">
+
+`odyn get` resolves `user/repo` shorthands against the following platforms:
+
+- `github` (default)
+- `codeberg`
+- `gitlab`
+- `sourcehut`
+- `bitbucket`
+- `framagit`
+- `disroot`
+- `notabug`
+- `savannah`
+
+Pass the platform with `--platform`:
+
+```sh
+odyn get razkar/farben --platform codeberg
+```
+
+You can also pass a full URL directly instead of a shorthand, in which case `--platform` is ignored.
+
+</Q>
+
+</div>
+
+## Workflow and Best Practices
+
+<div className={styles.section}>
+
+<Q q="Can I use Odyn in CI/CD?">
+
+Yes. The typical CI usage is:
+
+```sh
+odyn sync
+```
+
+That is the entire setup step. If `Odyn.lock` is committed and `odyn_deps/` is not cached, this command restores every dependency to its pinned state. It is fast, deterministic, and requires no configuration beyond having Git and the Odyn binary available.
+
+You can also add `odyn status` as a verification step to confirm the working tree matches the lockfile before building.
+
+</Q>
+
+<Q q="Does Odyn work offline?">
+
+`odyn sync` requires network access when dependencies are missing on disk, because it needs to clone them. If `odyn_deps/` is already present and intact, `odyn sync` just verifies hashes and does nothing. If you commit `odyn_deps/`, a checkout of your repository is fully self-contained and `odyn sync` will not need to make any network requests.
+
+`odyn status` works entirely offline. It only reads the disk and the lockfile.
+
+</Q>
+
+<Q q="How should I structure my Odin project with Odyn?">
+
+`odyn init` gives you a reasonable default:
+
+```
+myproject/
+  src/
+    main.odin
+  odyn_deps/
+  ols.json
+  Odyn.lock
+```
+
+The `ols.json` is pre-configured to register `odyn_deps/` as the `deps` collection, which means your language server (OLS) will resolve `import "deps:math"` correctly without any extra setup. Remember to pass `-collection:deps=odyn_deps` to the Odin compiler when building.
+
+</Q>
+
+<Q q="Can multiple people work on the same project?">
+
+Yes. Commit `Odyn.lock`. Everyone on the team runs `odyn sync` after pulling changes. The lockfile guarantees everyone gets the exact same dependency state regardless of when they run the command or what the upstream repositories currently look like.
+
+</Q>
+
+</div>
+
+## Comparisons
+
+<div className={styles.section}>
+
+<Q q="Why not use git submodules?">
+
+Git submodules are the most obvious alternative, and they have real problems in practice.
+
+**Cloning without the flag.** If someone clones your repository without `--recurse-submodules`, they get empty directories with no obvious error. This happens constantly. The fix is `git submodule update --init --recursive`, which most people do not know to run.
+
+**Updating a dependency.** Inside the submodule directory, `git pull` updates the content but does not update the parent repository's recorded pointer. You then have to stage and commit the updated pointer in the parent. It is easy to leave the submodule in a detached HEAD state or forget the parent commit entirely.
+
+**Removing a dependency.** There is no `git submodule remove`. You have to manually edit `.gitmodules`, edit `.git/config`, run `git rm --cached path/to/submodule`, delete the directory, and commit. That is four separate steps with no guardrails.
+
+**Pulling changes from a collaborator.** When a collaborator updates a submodule pointer and you pull, your submodule directory does not automatically update. You have to run `git submodule update` again, otherwise your build uses the old content while your lockfile says something different.
+
+Odyn makes each of these operations a single command. `odyn sync` handles missing content. `odyn update` handles upgrades. `odyn remove` handles removal. `odyn sync` after a pull restores the correct state.
+
+If you are comfortable with git submodules and they work for you, there is nothing wrong with continuing to use them. Odyn is not trying to force anyone away from a workflow that is already working.
+
+</Q>
+
+<Q q="Why not just use a shell script?">
+
+You can. A shell script that reads a text file and runs `git clone` and `git checkout` is a perfectly valid approach. Odyn is that script, but cross-platform, with a lockfile format, error handling, and consistent behavior across Windows, macOS, Linux, and more. If you want something simpler than Odyn, a script is a reasonable choice.
+
+</Q>
+
+<Q q="Why not use a real package manager if one existed for Odin?">
+
+The Odin language's creator is explicitly against package managers for reasons related to the language's design philosophy. Odyn exists in alignment with that philosophy. The goal is not to make a "nicer npm" but to automate the manual vendoring workflow that is already the recommended approach for Odin projects.
+
+</Q>
+
+</div>
+
+## Miscellaneous
+
+<div className={styles.section}>
+
+<Q q="Who made Odyn?">
+
+Odyn was made by RazkarStudio. The source is hosted on [Codeberg](https://codeberg.org/razkar/odyn).
+
+</Q>
+
+<Q q="Is Odyn stable?">
+
+All commands marked with a checkmark in the command reference are complete and stable. The project follows semantic versioning. Breaking changes to the lockfile format or command interface are not made without a version bump.
+
+</Q>
+
+<Q q="Where do I report bugs or request features?">
+
+Open an issue on the [Codeberg repository](https://codeberg.org/razkar/odyn/issues). Please check existing issues first to avoid duplicates.
+
+</Q>
+
+<Q q="Does Odyn have any telemetry or network calls besides git?">
+
+No. Odyn makes no network calls other than the git operations it performs on your behalf (cloning, fetching, and the `update-self` download when you explicitly invoke it). There is no analytics, no usage tracking, and no home-phone behavior of any kind. Telemetry is surveillance.
+
+</Q>
+
+</div>

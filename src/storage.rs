@@ -1,6 +1,9 @@
-use std::{io::ErrorKind, path::{Path, PathBuf}};
+use std::{
+    io::ErrorKind,
+    path::{Path, PathBuf},
+};
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::constants::LOCKFILE;
@@ -65,4 +68,61 @@ pub(crate) enum DepState {
     Ok,
     Missing,
     Modified { actual: String },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lockfile_serialize() {
+        let lockfile = Lockfile {
+            dep: vec![Dep {
+                name: "math".to_string(),
+                source: "https://github.com/odin-community/math".to_string(),
+                commit: "abc1234".to_string(),
+            }],
+        };
+        let toml_str = toml::to_string(&lockfile).unwrap();
+        assert!(toml_str.contains("name = \"math\""));
+        assert!(toml_str.contains("source = \"https://github.com/odin-community/math\""));
+        assert!(toml_str.contains("commit = \"abc1234\""));
+    }
+
+    #[test]
+    fn test_lockfile_deserialize() {
+        let toml_str = r#"
+[[dep]]
+name = "math"
+source = "https://github.com/odin-community/math"
+commit = "abc1234"
+"#;
+        let lockfile: Lockfile = toml::from_str(toml_str).unwrap();
+        assert_eq!(lockfile.dep.len(), 1);
+        assert_eq!(lockfile.dep[0].name, "math");
+        assert_eq!(
+            lockfile.dep[0].source,
+            "https://github.com/odin-community/math"
+        );
+        assert_eq!(lockfile.dep[0].commit, "abc1234");
+    }
+
+    #[test]
+    fn test_lockfile_empty() {
+        let lockfile = Lockfile { dep: Vec::new() };
+        let toml_str = toml::to_string(&lockfile).unwrap();
+        assert!(toml_str.is_empty() || !toml_str.contains("[[dep]]"));
+    }
+
+    #[test]
+    fn test_dep_state_variants() {
+        let _ok = DepState::Ok;
+        let _missing = DepState::Missing;
+        let modified = DepState::Modified {
+            actual: "abc1234".to_string(),
+        };
+        if let DepState::Modified { actual } = modified {
+            assert_eq!(actual, "abc1234");
+        }
+    }
 }

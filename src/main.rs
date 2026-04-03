@@ -12,10 +12,6 @@ use crate::commands::{
     cmd_get, cmd_init, cmd_remove, cmd_status, cmd_sync, cmd_update, cmd_update_self, cmd_version,
 };
 
-/// Odyn: reproducible vendoring for Odin projects.
-///
-/// Manages dependencies by cloning Git repositories into `odyn_deps/`
-/// and pinning exact commits in `Odyn.lock`.
 #[derive(Parser)]
 #[command(
     name = "odyn",
@@ -38,10 +34,6 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Clone a dependency into `odyn_deps/` and pin it in Odyn.lock.
-    ///
-    /// Clones the repository at SOURCE and checks out its current HEAD.
-    /// The resulting folder is placed at `odyn_deps/<name>`, where `<name>`
-    /// defaults to the repository name if not specified.
     Get {
         /// Git URL or `user/repo` shorthand to the dependency.
         source: String,
@@ -49,9 +41,7 @@ enum Commands {
         /// Name for the `odyn_deps/` subfolder. Defaults to the repo name.
         name: Option<String>,
 
-        /// Platform to resolve `user/repo` shorthand against. Defaults to github.
-        /// Options: github, codeberg, gitlab, sourcehut, bitbucket, framagit,
-        /// disroot, notabug, savannah
+        /// Platform to resolve `user/repo` shorthand against.
         #[arg(long, default_value = "github")]
         platform: String,
 
@@ -59,9 +49,7 @@ enum Commands {
         #[arg(long)]
         commit: Option<String>,
 
-        /// Perform a shallow clone with the given history depth.
-        /// Passes `--depth <n>` to git, limiting the number of commits fetched.
-        /// Useful for large repositories where full history is not needed.
+        /// Shallow clone with the given history depth.
         #[arg(long)]
         depth: Option<u32>,
 
@@ -71,20 +59,15 @@ enum Commands {
     },
 
     /// Create a new Odin project with the standard layout.
-    ///
-    /// Scaffolds a new project directory containing `src/main.odin`,
-    /// an empty `odyn_deps/`, and an empty `Odyn.lock`. Pass flags to
-    /// adjust what gets generated.
     Init {
         /// Name of the project directory to create.
         project_name: Option<String>,
 
-        /// License to generate. Defaults to mit.
-        /// Options: mit, apache, gpl3, bsd2, bsd3, mpl2, unlicense, zlib, isc
+        /// License to generate.
         #[arg(long, default_value = "mit")]
         license: String,
 
-        /// Add a `README.md` stub to the project root.
+        /// Add a `README.md` stub.
         #[arg(long)]
         with_readme: bool,
 
@@ -93,64 +76,40 @@ enum Commands {
         no_src: bool,
 
         /// Migrate an existing Odin project to use Odyn.
-        ///
-        /// Adds `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` to the
-        /// current directory. Does not create `src/` or any other files.
-        /// Errors if any of these already exist.
         #[arg(long)]
         migrate: bool,
     },
 
     /// Sync `odyn_deps/` to match Odyn.lock exactly.
-    ///
-    /// Re-clones missing dependencies and resets existing ones to their
-    /// pinned commits. Errors if any `odyn_deps/` folder has uncommitted
-    /// local changes. Safe to run multiple times — always produces
-    /// the same result.
     Sync {
         /// Force revert locally modified changes instead of aborting
         #[arg(long)]
         force: bool,
 
-        /// Skip checking a specific dependency entirely. Chainable.
+        /// Skip checking a specific dependency entirely.
         #[arg(long)]
         skip: Vec<String>,
     },
 
     /// Remove a dependency from `odyn_deps/` and Odyn.lock.
-    ///
-    /// Deletes `odyn_deps/<name>` and strips the corresponding entry from
-    /// Odyn.lock. Does not touch other dependencies, even if they
-    /// share a transitive source.
     Remove {
-        /// Name of the dependency to remove, as it appears in Odyn.lock.
+        /// Name of the dependency to remove.
         name: String,
     },
 
     /// Update a dependency to its latest commit and re-pin it.
-    ///
-    /// Fetches the latest commit from the dependency's source URL and
-    /// updates the entry in Odyn.lock. Only the named dependency is
-    /// affected, no transitive updates.
     Update {
-        /// Name of the dependency to update, as it appears in Odyn.lock.
+        /// Name of the dependency to update.
         name: String,
     },
 
     /// Show the current state of all vendored dependencies.
-    ///
-    /// Checks each entry in Odyn.lock against its folder in `odyn_deps/`
-    /// and reports whether it is clean, missing, or modified.
     Status,
 
     /// Updates Odyn itself to the latest stable release.
-    ///
-    /// Downloads the appropriate binary for your platform from
-    /// <https://codeberg.org/razkar/odyn/releases> and replaces
-    /// the current executable.
     #[command(name = "update-self")]
     UpdateSelf {
-        /// Update to the latest pre-release instead of the latest stable.
+        /// Update to the latest pre-release.
         #[arg(long)]
         pre_release: bool,
 
@@ -220,7 +179,7 @@ fn run(cli: Cli) -> anyhow::Result<()> {
                 if migrate {
                     status("Migrating", "load", "current project");
                 } else {
-                    status("Creating", "load", &format!("odin project '{name}'",));
+                    status("Creating", "load", &format!("odin project '{name}'"));
                 }
                 cmd_init(name.clone(), license, with_readme, no_src, migrate)?;
                 if migrate {
@@ -240,7 +199,10 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             Commands::Update { name } => {
                 cmd_update(name)?;
             }
-            Commands::UpdateSelf { pre_release, nightly } => {
+            Commands::UpdateSelf {
+                pre_release,
+                nightly,
+            } => {
                 cmd_update_self(pre_release, nightly)?;
             }
             Commands::Status => {
