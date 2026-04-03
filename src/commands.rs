@@ -59,7 +59,7 @@ fn git_head(dep_path: &PathBuf) -> Result<String> {
 }
 
 pub(crate) fn cmd_version(verbose: bool) {
-    let extra = match env!("ODYN_INSTALL_METHOD") {
+    let special = match env!("ODYN_INSTALL_METHOD") {
         "cargo" => "[ansi(173)]Cargo Edition".to_string(),
         "source" => {
             let res = "[ansi(62)]Nightly".to_string();
@@ -89,7 +89,29 @@ pub(crate) fn cmd_version(verbose: bool) {
         }
         _ => "".to_string(),
     };
-    cprintln!("[bold blue]Odyn[/blue] v{VERSION} {extra}");
+
+    let os_arch = match env!("ODYN_INSTALL_METHOD") {
+        "release" => String::new(),
+        _ => {
+            let os_name = match std::env::consts::OS {
+                "linux" => "[yellow]Linux[/yellow]",
+                "windows" => "[blue]Windows[/blue]",
+                "macos" => "[ansi(250)]macOS[/ansi(250)]",
+                "android" => "[green]Android[/green]",
+                "freebsd" => "[bright-red]FreeBSD[/bright-red]",
+                "netbsd" => "[ansi(214)]NetBSD[/ansi(214)]",
+                other => other,
+            };
+            format!("| {os_name} {}", std::env::consts::ARCH)
+        }
+    };
+
+    let line = if os_arch.is_empty() {
+        format!("[bold blue]Odyn[/blue] v{VERSION} {special}")
+    } else {
+        format!("[bold blue]Odyn[/blue] v{VERSION} {special} {os_arch}")
+    };
+    cprintln!("{line}");
     println!("    Reproducible vendoring tool for the Odin programming language.");
 
     let git_version = std::process::Command::new("git")
@@ -200,7 +222,12 @@ pub(crate) fn cmd_init(
     Ok(())
 }
 
-pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool, force_stable: bool) -> Result<()> {
+pub(crate) fn cmd_update_self(
+    pre_release: bool,
+    nightly: bool,
+    commit_override: Option<String>,
+    force_stable: bool,
+) -> Result<()> {
     if pre_release && nightly {
         return Err(anyhow!(
             "--pre-release and --nightly cannot be used together"
@@ -221,20 +248,24 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool, force_stable: bo
     let arch = std::env::consts::ARCH;
 
     if nightly {
-        let commit = ureq::get("https://codeberg.org/api/v1/repos/razkar/odyn/branches/main")
-            .call()
-            .ok()
-            .and_then(|mut r| r.body_mut().read_to_string().ok())
-            .and_then(|body| {
-                body.split("\"id\":")
-                    .nth(1)?
-                    .trim_start_matches([' ', '\t'])
-                    .strip_prefix('"')?
-                    .split('"')
-                    .next()
-                    .map(|s| s[..8].to_string())
-            })
-            .unwrap_or_else(|| "unknown".to_string());
+        let commit = if let Some(c) = commit_override {
+            c
+        } else {
+            ureq::get("https://codeberg.org/api/v1/repos/razkar/odyn/branches/main")
+                .call()
+                .ok()
+                .and_then(|mut r| r.body_mut().read_to_string().ok())
+                .and_then(|body| {
+                    body.split("\"id\":")
+                        .nth(1)?
+                        .trim_start_matches([' ', '\t'])
+                        .strip_prefix('"')?
+                        .split('"')
+                        .next()
+                        .map(|s| s[..8].to_string())
+                })
+                .unwrap_or_else(|| "unknown".to_string())
+        };
 
         status(
             "Nightly",
@@ -256,6 +287,8 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool, force_stable: bo
                 "https://codeberg.org/razkar/odyn.git",
                 "--force",
                 "--no-default-features",
+                "--rev",
+                &commit,
                 "--root",
             ])
             .arg(&temp_root)

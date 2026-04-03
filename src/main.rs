@@ -23,7 +23,9 @@ struct Cli {
     #[arg(long, short = 'V', action = clap::ArgAction::SetTrue)]
     version: bool,
 
-    /// Print extra details (install path, build date). Only meaningful with --version.
+    /// Print extra details about the Odyn installation. This includes the full path to the
+    /// installed binary and the date this build was compiled. This flag only has an effect
+    /// when used together with --version.
     #[arg(long, action = clap::ArgAction::SetTrue)]
     verbose: bool,
 
@@ -33,98 +35,140 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Clone a dependency into `odyn_deps/` and pin it in Odyn.lock.
+    /// Clone a dependency from a remote Git repository into the odyn_deps directory and
+    /// record its exact commit in the Odyn.lock file. The source can be a full Git URL or
+    /// a shorthand like user/repo which is resolved against the chosen platform.
     Get {
-        /// Git URL or `user/repo` shorthand to the dependency.
+        /// The Git URL or a user/repo shorthand pointing to the dependency repository.
+        /// When using the shorthand form the platform flag determines which forge to use.
         source: String,
 
-        /// Name for the `odyn_deps/` subfolder. Defaults to the repo name.
+        /// The name of the subfolder created inside odyn_deps. If omitted the repository
+        /// name is used automatically after stripping any trailing .git suffix.
         name: Option<String>,
 
-        /// Platform to resolve `user/repo` shorthand against.
+        /// The forge platform used to resolve a user/repo shorthand into a full URL.
+        /// Supported values include github, codeberg, gitlab, sourcehut, bitbucket and
+        /// several others.
         #[arg(long, default_value = "github")]
         platform: String,
 
-        /// Pin a specific commit instead of HEAD.
+        /// Pin the clone to a specific commit instead of the default branch HEAD. The
+        /// dependency is checked out to this exact commit after cloning.
         #[arg(long)]
         commit: Option<String>,
 
-        /// Shallow clone with the given history depth.
+        /// Perform a shallow clone that only fetches the given number of commits from
+        /// history. This reduces download size and clone time for large repositories.
         #[arg(long)]
         depth: Option<u32>,
 
-        /// Extra arguments to pass directly to `git clone`.
+        /// Additional arguments passed directly through to the underlying git clone
+        /// command. Use this for advanced clone options that Odyn does not expose as
+        /// dedicated flags.
         #[arg(last = true)]
         extra_args: Vec<String>,
     },
 
-    /// Create a new Odin project with the standard layout.
+    /// Create a new Odin project directory with the standard file layout including a
+    /// lockfile, package configuration and an optional source tree. This is the fastest
+    /// way to start a fresh project with Odyn already set up.
     Init {
-        /// Name of the project directory to create.
+        /// The name of the project directory to create. The directory must not already
+        /// exist and will be created relative to the current working directory.
         project_name: Option<String>,
 
-        /// License to generate.
+        /// The software license to generate as a LICENSE file in the project root.
+        /// Common values are mit, apache, gpl3, bsd2, bsd3, mpl2, unlicense, zlib and isc.
         #[arg(long, default_value = "mit")]
         license: String,
 
-        /// Add a `README.md` stub.
+        /// Generate a README.md file with the project name as the title. This is useful
+        /// for projects that will be published publicly or shared with others.
         #[arg(long)]
         with_readme: bool,
 
-        /// Skip creating the `src/` directory.
+        /// Skip the creation of the src directory. Use this when you prefer a flat layout
+        /// with the main source file at the project root instead of inside a subfolder.
         #[arg(long)]
         no_src: bool,
 
-        /// Migrate an existing Odin project to use Odyn.
+        /// Migrate an existing Odin project to use Odyn for dependency management. This
+        /// creates the lockfile and adds a deps collection to ols.json if it exists.
         #[arg(long)]
         migrate: bool,
     },
 
-    /// Sync `odyn_deps/` to match Odyn.lock exactly.
+    /// Walk every dependency listed in Odyn.lock and verify that the local copy inside
+    /// odyn_deps matches the pinned commit exactly. Missing dependencies are cloned from
+    /// scratch and modified ones are hard reset to the expected state.
     Sync {
-        /// Force revert locally modified changes instead of aborting
+        /// Force a hard reset of locally modified dependencies back to their pinned
+        /// commits instead of aborting with an error.
         #[arg(long)]
         force: bool,
 
-        /// Skip checking a specific dependency entirely.
+        /// Skip the named dependency entirely during the sync pass. This flag can be
+        /// repeated to skip multiple dependencies.
         #[arg(long)]
         skip: Vec<String>,
     },
 
-    /// Remove a dependency from `odyn_deps/` and Odyn.lock.
+    /// Remove a dependency from both the odyn_deps directory on disk and the Odyn.lock
+    /// file. The dependency folder is deleted recursively and the lockfile entry is
+    /// stripped out so it is no longer tracked.
     Remove {
-        /// Name of the dependency to remove.
+        /// The name of the dependency to remove. This must match the name field as it
+        /// appears in the Odyn.lock file.
         name: String,
     },
 
-    /// Update a dependency to its latest commit and re-pin it.
+    /// Fetch the latest commits for a dependency and reset it to the newest commit on
+    /// its default branch. The pinned commit in Odyn.lock is updated to reflect the new
+    /// state so future syncs reproduce this revision.
     Update {
-        /// Name of the dependency to update.
+        /// The name of the dependency to update. This must match the name field as it
+        /// appears in the Odyn.lock file.
         name: String,
     },
 
-    /// Show the current state of all vendored dependencies.
+    /// Check every vendored dependency in odyn_deps against the commit recorded in
+    /// Odyn.lock and report whether each one is up to date, missing or locally modified.
+    /// This is a read only operation that never changes files on disk.
     Status,
 
-    /// Updates Odyn itself to the latest stable release.
+    /// Download and replace the currently running Odyn binary with the latest version
+    /// available from the release channel. By default this targets the newest stable
+    /// release but pre-release and nightly channels are available through flags.
     #[command(name = "update-self")]
     UpdateSelf {
-        /// Update to the latest pre-release.
+        /// Target the latest pre-release version instead of a stable release. Pre-releases
+        /// may contain experimental features and are not recommended for production use.
         #[arg(long)]
         pre_release: bool,
 
-        /// Update to the latest nightly build.
+        /// Build from the latest commit on the main branch and install it as the current
+        /// binary. This requires a working Rust toolchain with cargo available on PATH.
         #[arg(long)]
         nightly: bool,
 
-        /// Force update to the latest stable release, even if the local version is newer.
+        /// Specify a commit to build from when using --nightly. If omitted the latest
+        /// commit on the main branch is used automatically.
+        #[arg(long, requires = "nightly")]
+        commit: Option<String>,
+
+        /// Force an update to the latest stable release even when the locally installed
+        /// version is already newer. This is useful for downgrading after testing a
+        /// pre-release or nightly build.
         #[arg(long)]
         force_stable: bool,
     },
 
-    /// Print version information.
+    /// Print the current Odyn version along with metadata about the install method and
+    /// build target. Use the verbose flag to see the full binary path and build date.
     Version {
-        /// Print extra details: install path and build date.
+        /// Print extra details including the absolute path to the installed binary and
+        /// the date this build was compiled.
         #[arg(long, action = clap::ArgAction::SetTrue)]
         verbose: bool,
     },
@@ -206,9 +250,10 @@ fn run(cli: Cli) -> anyhow::Result<()> {
             Commands::UpdateSelf {
                 pre_release,
                 nightly,
+                commit,
                 force_stable,
             } => {
-                cmd_update_self(pre_release, nightly, force_stable)?;
+                cmd_update_self(pre_release, nightly, commit, force_stable)?;
             }
             Commands::Status => {
                 cmd_status()?;
