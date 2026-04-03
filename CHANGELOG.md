@@ -2,6 +2,11 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
+## [0.3.1] - 2026-04-03
+
+### Fixed
+- Bug where `odyn update-self` returns a `ETXTBSY` (text file busy) error.
+
 ## [0.3.0] - 2026-04-03
 
 ### Added

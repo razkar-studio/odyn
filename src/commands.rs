@@ -426,6 +426,10 @@ pub(crate) fn cmd_update_self(pre_release: bool, nightly: bool) -> Result<()> {
 
     #[cfg(not(target_os = "windows"))]
     {
+        if let Err(e) = std::fs::remove_file(&current_exe) {
+            std::fs::remove_file(&temp_path).ok();
+            return Err(anyhow!("failed to remove current binary: {e}"));
+        }
         if let Err(e) = std::fs::copy(&temp_path, &current_exe) {
             std::fs::remove_file(&temp_path).ok();
             return Err(anyhow!("failed to install new binary: {e}"));
