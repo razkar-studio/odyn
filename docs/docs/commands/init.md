@@ -86,7 +86,7 @@ cd myproject
 odyn init --migrate
 ```
 
-This adds `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` to the current directory. No existing files are touched or overwritten. The command errors if any of those three already exist.
+This adds `odyn_deps/`, `ols.json`, and an empty `Odyn.lock` to the current directory. No existing files are touched or overwritten. The command errors if `ols.json` has a malformed structure or already contains a `deps` collection, or if `Odyn.lock` already exists.
 
 :::tip
 After migrating, run `odyn get` to start adding dependencies and commit the resulting `Odyn.lock`.
@@ -95,5 +95,5 @@ After migrating, run `odyn get` to start adding dependencies and commit the resu
 ## Notes
 
 - `init` fails if the target directory already exists.
-- `init --migrate` fails if `odyn_deps/`, `ols.json`, or `Odyn.lock` already exist in the current directory.
+- `init --migrate` fails if `Odyn.lock` already exists, or if `ols.json` is malformed or already contains a `deps` collection. Validation runs before any files are created, so a failed migration leaves your project untouched.
 - The project name is used verbatim as the directory name and inside `main.odin`'s package name.

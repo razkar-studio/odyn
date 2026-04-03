@@ -40,14 +40,14 @@ Odyn vX.X.X <os> <arch>
 
 Installed from source:
 ```
-Odyn vX.X.X Nightly, commit <hash>
+Odyn vX.X.X Nightly, commit <hash> | <os> <arch>
     Reproducible vendoring tool for the Odin programming language.
 ```
 *Where `<hash>` is the git commit hash when you cloned from source.*
 
 Installed using Cargo:
 ```
-Odyn vX.X.X Cargo Edition
+Odyn vX.X.X Cargo Edition | <os> <arch>
     Reproducible vendoring tool for the Odin programming language.
 ```
 

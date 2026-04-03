@@ -30,10 +30,10 @@ The second line after the version heading is color-coded by install method:
 | Install method | Label shown |
 |---|---|
 | Release binary | OS and architecture (e.g. `Linux x86_64`) |
-| `cargo install` | `Cargo Edition` |
-| Built from source | `Nightly, commit <hash>` |
+| `cargo install` | `Cargo Edition \| Linux x86_64` |
+| Built from source | `Nightly, commit <hash> \| Linux x86_64` |
 
-The git version line is shown in orange if git is on your PATH, or in red as **Git Not Installed** if it isn't.
+Non-release builds always display the OS and architecture after a pipe separator. The git version line is shown in orange if git is on your PATH, or in red as **Git Not Installed** if it isn't.
 
 ## Options
 

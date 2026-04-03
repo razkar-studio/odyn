@@ -2,6 +2,25 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
+## [0.4.0-rc] - 2026-04-03
+
+### Added
+
+- `odyn update-self --force-stable`: forces an update to the latest stable release even when the locally installed version is newer. Useful for downgrading after testing pre-release or nightly builds
+- `odyn update-self --nightly --commit <hash>`: allows building a specific commit when using the nightly path instead of defaulting to `main` HEAD
+- `odyn version` now always displays the OS and architecture for non-release builds (Cargo and Nightly), formatted as `| <OS> <ARCH>`
+- Comprehensive CLI `--help` documentation expanded for every subcommand and flag
+
+### Fixed
+
+- `update-self --nightly` now replaces the running binary in-place instead of installing to Cargo's bin directory, ensuring `odyn --version` reflects the newly built version
+- `update-self` on Unix no longer bricks the installation if the copy fails. Now uses the same safe rename-to-backup pattern as Windows instead of deleting the current binary before copying
+- `short()` now produces standard 8-character git hashes instead of 7
+- `parse_version` no longer silently drops pre-release suffixes. `0.3.1-beta` now correctly parses as `(0, 3, 1)` instead of `(0, 3, 0)`
+- `init --migrate` no longer leaves `odyn_deps/` in a stuck state if `ols.json` validation fails. Directory creation is now deferred until after all checks pass
+- `update` and `sync` now handle shallow clones correctly by detecting them and running `git fetch --unshallow` before resetting
+- Nightly commit parsing from the Codeberg API now uses the correct JSON key (`"id"` instead of `"sha"`)
+
 ## [0.3.1] - 2026-04-03
 
 ### Fixed

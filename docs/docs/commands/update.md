@@ -20,6 +20,8 @@ odyn update <name>
 
 `update` runs a `git fetch` followed by a hard reset to `FETCH_HEAD` inside `odyn_deps/<name>`, then records the new HEAD commit in `Odyn.lock`. Only the named dependency is affected.
 
+If the dependency was originally cloned with `--depth` (shallow clone), `update` automatically runs `git fetch --unshallow` first to retrieve the full history before fetching the latest commits.
+
 ## Examples
 
 ```sh

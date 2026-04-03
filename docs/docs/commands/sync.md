@@ -29,6 +29,8 @@ For each entry in `Odyn.lock`, `sync` checks the state of the corresponding fold
 - **Present but at a different commit:** treated as modified. Sync aborts unless `--force` is passed.
 - **Missing:** cloned from the source URL, then reset to the pinned commit.
 
+If a missing dependency was previously shallow-cloned, `sync` automatically runs `git fetch --unshallow` before resetting to ensure the pinned commit is reachable. If unshallow fails, it attempts a direct fetch of the pinned commit as a fallback.
+
 `sync` is safe to run multiple times. It always produces the same result.
 
 ## Examples

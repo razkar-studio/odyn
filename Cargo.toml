@@ -1,6 +1,6 @@
 [package]
 name = "odyn"
-version = "0.3.1"
+version = "0.4.0-rc"
 edition = "2024"
 build = "build.rs"
 description = "Reproducible vendoring for Odin. Not a package manager."
