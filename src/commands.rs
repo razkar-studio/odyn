@@ -18,7 +18,7 @@ use sha2::{Digest, Sha256};
 fn short(commit: &str) -> &str {
     let end = commit
         .char_indices()
-        .nth(7)
+        .nth(8)
         .map(|(i, _)| i)
         .unwrap_or(commit.len());
     &commit[..end]
@@ -26,7 +26,16 @@ fn short(commit: &str) -> &str {
 
 pub(crate) fn parse_version(s: &str) -> (u32, u32, u32) {
     let s = s.trim_start_matches('v');
-    let parts: Vec<u32> = s.split('.').filter_map(|p| p.parse().ok()).collect();
+    let parts: Vec<u32> = s
+        .split('.')
+        .map(|p| {
+            p.chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect::<String>()
+                .parse::<u32>()
+                .unwrap_or(0)
+        })
+        .collect();
     match parts.as_slice() {
         [major, minor, patch, ..] => (*major, *minor, *patch),
         [major, minor] => (*major, *minor, 0),
@@ -154,8 +163,6 @@ pub(crate) fn cmd_init(
             return Err(anyhow!("'Odyn.lock' already exists"));
         }
 
-        std::fs::create_dir_all(&deps_dir)?;
-
         if ols.exists() {
             let content = std::fs::read_to_string(&ols)?;
             let mut json: serde_json::Value = serde_json::from_str(&content)
@@ -175,6 +182,8 @@ pub(crate) fn cmd_init(
         } else {
             std::fs::write(&ols, OLS_JSON)?;
         }
+
+        std::fs::create_dir_all(&deps_dir)?;
 
         save_lockfile_at(&Lockfile { dep: Vec::new() }, &PathBuf::from("."))?;
 
@@ -332,15 +341,18 @@ pub(crate) fn cmd_update_self(
 
         #[cfg(not(target_os = "windows"))]
         {
-            if let Err(e) = std::fs::remove_file(&current_exe) {
+            let old_path = current_exe.with_extension("bak");
+            if let Err(e) = std::fs::rename(&current_exe, &old_path) {
                 std::fs::remove_dir_all(&temp_root).ok();
-                return Err(anyhow!("failed to remove current binary: {e}"));
+                return Err(anyhow!("failed to rename current binary: {e}"));
             }
             if let Err(e) = std::fs::copy(&built_binary, &current_exe) {
+                std::fs::rename(&old_path, &current_exe).ok();
                 std::fs::remove_dir_all(&temp_root).ok();
                 return Err(anyhow!("failed to install new binary: {e}"));
             }
             std::fs::remove_dir_all(&temp_root).ok();
+            std::fs::remove_file(&old_path).ok();
         }
 
         status(
@@ -520,15 +532,18 @@ pub(crate) fn cmd_update_self(
 
     #[cfg(not(target_os = "windows"))]
     {
-        if let Err(e) = std::fs::remove_file(&current_exe) {
+        let old_path = current_exe.with_extension("bak");
+        if let Err(e) = std::fs::rename(&current_exe, &old_path) {
             std::fs::remove_file(&temp_path).ok();
-            return Err(anyhow!("failed to remove current binary: {e}"));
+            return Err(anyhow!("failed to rename current binary: {e}"));
         }
         if let Err(e) = std::fs::copy(&temp_path, &current_exe) {
+            std::fs::rename(&old_path, &current_exe).ok();
             std::fs::remove_file(&temp_path).ok();
             return Err(anyhow!("failed to install new binary: {e}"));
         }
         std::fs::remove_file(&temp_path).ok();
+        std::fs::remove_file(&old_path).ok();
     }
 
     status("Updated", "success", &format!("odyn updated to v{latest}"));
@@ -564,8 +579,15 @@ pub(crate) fn cmd_update(name: String) -> Result<()> {
 
     status("Updating", "load", &format!("'{name}'"));
 
+    let is_shallow = dep_path.join(".git").join("shallow").exists();
+
+    let fetch_args: Vec<&str> = if is_shallow {
+        vec!["fetch", "origin", "--quiet", "--unshallow"]
+    } else {
+        vec!["fetch", "origin", "--quiet"]
+    };
     let fetch_status = std::process::Command::new("git")
-        .args(["fetch", "origin", "--quiet"])
+        .args(&fetch_args)
         .current_dir(&dep_path)
         .status()?;
     if !fetch_status.success() {
@@ -729,17 +751,42 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
                         return Err(anyhow!("failed to clone '{}'", dep.name));
                     }
                 } else {
-                    status(
-                        "Fetching",
-                        "load",
-                        &format!("'{}' before reset...", dep.name),
-                    );
-                    let fetch_status = std::process::Command::new("git")
-                        .args(["fetch", "origin", "--quiet"])
-                        .current_dir(&dep_path)
-                        .status()?;
-                    if !fetch_status.success() {
-                        return Err(anyhow!("failed to fetch '{}' before reset", dep.name));
+                    let is_shallow = dep_path.join(".git").join("shallow").exists();
+                    if is_shallow {
+                        status(
+                            "Fetching",
+                            "load",
+                            &format!("'{}' with full history...", dep.name),
+                        );
+                        let fetch_status = std::process::Command::new("git")
+                            .args(["fetch", "origin", "--quiet", "--unshallow"])
+                            .current_dir(&dep_path)
+                            .status();
+                        if fetch_status.is_err() || !fetch_status.unwrap().success() {
+                            status(
+                                "Hint",
+                                "info",
+                                &format!("unshallow failed for '{}', trying shallow fetch of pinned commit", dep.name),
+                            );
+                            std::process::Command::new("git")
+                                .args(["fetch", "origin", dep.commit.as_str(), "--quiet"])
+                                .current_dir(&dep_path)
+                                .status()
+                                .ok();
+                        }
+                    } else {
+                        status(
+                            "Fetching",
+                            "load",
+                            &format!("'{}' before reset...", dep.name),
+                        );
+                        let fetch_status = std::process::Command::new("git")
+                            .args(["fetch", "origin", "--quiet"])
+                            .current_dir(&dep_path)
+                            .status()?;
+                        if !fetch_status.success() {
+                            return Err(anyhow!("failed to fetch '{}' before reset", dep.name));
+                        }
                     }
                     status(
                         "Resetting",
@@ -942,6 +989,8 @@ mod tests {
         assert_eq!(parse_version(""), (0, 0, 0));
         assert_eq!(parse_version("abc"), (0, 0, 0));
         assert_eq!(parse_version("1.2.3.4"), (1, 2, 3));
+        assert_eq!(parse_version("0.3.1-beta"), (0, 3, 1));
+        assert_eq!(parse_version("1.0.0-rc.1"), (1, 0, 0));
     }
 
     #[test]
@@ -969,9 +1018,9 @@ mod tests {
 
     #[test]
     fn test_short() {
-        assert_eq!(short("abcd1234efgh5678"), "abcd123");
+        assert_eq!(short("abcd1234efgh5678"), "abcd1234");
         assert_eq!(short("abc"), "abc");
         assert_eq!(short(""), "");
-        assert_eq!(short("1234567890abcdef"), "1234567");
+        assert_eq!(short("1234567890abcdef"), "12345678");
     }
 }
