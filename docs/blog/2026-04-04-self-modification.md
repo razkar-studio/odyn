@@ -11,7 +11,7 @@ That moment, for a lot of developers, is the first time they watch their applica
 
 Not to a user's data. Not to an external service. To its own running body.
 
----
+<!-- truncate -->
 
 ## The git fetch Moment
 
