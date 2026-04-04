@@ -2,7 +2,7 @@
 slug: context-aware-outputs
 title: Context-Aware Outputs Are Cool, Actually
 authors: razkar
-tags: [cli, dx, context-aware]
+tags: [cli, dx, context-aware, app]
 ---
 
 A program that outputs something is cool. But you know something even cooler?

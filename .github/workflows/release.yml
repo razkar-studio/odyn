@@ -9,7 +9,7 @@ jobs:
   build-macos-x86_64:
     runs-on: macos-15-intel
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
 
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -40,7 +40,7 @@ jobs:
   build-macos-aarch64:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
 
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -71,7 +71,7 @@ jobs:
   build-android-aarch64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -98,7 +98,7 @@ jobs:
   build-android-armv7:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -125,7 +125,7 @@ jobs:
   build-android-x86_64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -152,7 +152,7 @@ jobs:
   build-netbsd-x86_64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -181,7 +181,7 @@ jobs:
   build-freebsd-x86_64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -210,7 +210,7 @@ jobs:
   build-freebsd-i686:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -236,6 +236,34 @@ jobs:
             -F "attachment=@odyn-freebsd-i686" \
             "https://codeberg.org/api/v1/repos/razkar/odyn/releases/${RELEASE_ID}/assets?name=odyn-freebsd-i686"
 
+  build-windows-aarch64:
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-pc-windows-msvc
+
+      - name: Build
+        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target aarch64-pc-windows-msvc
+
+      - name: Rename
+        run: cp target/aarch64-pc-windows-msvc/release/odyn.exe odyn-windows-aarch64.exe
+
+      - name: Upload to Codeberg release
+        run: |
+          RELEASE_ID=$(curl -sf \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/tags/${{ github.ref_name }}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
+            -F "attachment=@odyn-windows-aarch64.exe" \
+            "https://codeberg.org/api/v1/repos/razkar/odyn/releases/${RELEASE_ID}/assets?name=odyn-windows-aarch64.exe"
+
   generate-sums:
     needs:
       - build-macos-x86_64
@@ -246,6 +274,7 @@ jobs:
       - build-netbsd-x86_64
       - build-freebsd-x86_64
       - build-freebsd-i686
+      - build-windows-aarch64
     runs-on: ubuntu-latest
     steps:
       - name: Download odyn-macos-x86_64
@@ -287,6 +316,11 @@ jobs:
         run: |
           curl -L -o odyn-freebsd-i686 \
             "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-freebsd-i686"
+
+      - name: Download odyn-windows-aarch64
+        run: |
+          curl -L -o odyn-windows-aarch64.exe \
+            "https://codeberg.org/razkar/odyn/releases/download/${{ github.ref_name }}/odyn-windows-aarch64.exe"
 
       - name: Generate SHA256SUMS-github
         run: sha256sum odyn-* > SHA256SUMS-github

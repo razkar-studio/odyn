@@ -17,3 +17,18 @@ context-aware:
   label: Context Aware
   permalink: /context-aware
   description: About context-awareness
+
+app:
+  label: App
+  permalink: /app
+  description: About apps
+
+self-modification:
+  label: Self-modification
+  permalink: /self-modification
+  description: Things that modify itself
+
+projectception:
+  label: Projectception
+  permalink: /projectception
+  description: Where your project can build itself using itself.

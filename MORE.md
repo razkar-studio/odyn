@@ -4,7 +4,7 @@
 |-------------------------|---------------|-------------------------------|
 | **Windows**             | x86_64/AMD64  | :white_check_mark: Supported  |
 |                         | i686 (32-bit) | :white_check_mark: Supported  |
-|                         | aarch64       | :soon: Maybe Soon             |
+|                         | aarch64       | :white_check_mark: Supported  |
 | **macOS**               | aarch64       | :white_check_mark: Supported  |
 |                         | x86_64        | :white_check_mark: Supported  |
 | **Linux**               | x86_64        | :white_check_mark: Supported  |
@@ -38,5 +38,3 @@
 | *Others*                | Others        | Build from source / Use Cargo |
 
 If macOS support isn't visible in the Releases page, the GitHub runner probably failed.
-
-For Windows ARM PCs, I'm currently waiting on GitHub Actions to add runner support there. Maybe soon.
