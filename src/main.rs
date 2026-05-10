@@ -35,7 +35,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Clone a dependency from a remote Git repository into the odyn_deps directory and
+    /// Clone a dependency from a remote Git repository into the `odyn_deps` directory and
     /// record its exact commit in the Odyn.lock file. The source can be a full Git URL or
     /// a shorthand like user/repo which is resolved against the chosen platform.
     Get {
@@ -43,7 +43,7 @@ enum Commands {
         /// When using the shorthand form the platform flag determines which forge to use.
         source: String,
 
-        /// The name of the subfolder created inside odyn_deps. If omitted the repository
+        /// The name of the subfolder created inside `odyn_deps`. If omitted the repository
         /// name is used automatically after stripping any trailing .git suffix.
         name: Option<String>,
 
@@ -100,7 +100,7 @@ enum Commands {
     },
 
     /// Walk every dependency listed in Odyn.lock and verify that the local copy inside
-    /// odyn_deps matches the pinned commit exactly. Missing dependencies are cloned from
+    /// `odyn_deps` matches the pinned commit exactly. Missing dependencies are cloned from
     /// scratch and modified ones are hard reset to the expected state.
     Sync {
         /// Force a hard reset of locally modified dependencies back to their pinned
@@ -114,7 +114,7 @@ enum Commands {
         skip: Vec<String>,
     },
 
-    /// Remove a dependency from both the odyn_deps directory on disk and the Odyn.lock
+    /// Remove a dependency from both the `odyn_deps` directory on disk and the Odyn.lock
     /// file. The dependency folder is deleted recursively and the lockfile entry is
     /// stripped out so it is no longer tracked.
     Remove {
@@ -132,7 +132,7 @@ enum Commands {
         name: String,
     },
 
-    /// Check every vendored dependency in odyn_deps against the commit recorded in
+    /// Check every vendored dependency in `odyn_deps` against the commit recorded in
     /// Odyn.lock and report whether each one is up to date, missing or locally modified.
     /// This is a read only operation that never changes files on disk.
     Status,

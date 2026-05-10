@@ -19,8 +19,7 @@ fn short(commit: &str) -> &str {
     let end = commit
         .char_indices()
         .nth(8)
-        .map(|(i, _)| i)
-        .unwrap_or(commit.len());
+        .map_or(commit.len(), |(i, _)| i);
     &commit[..end]
 }
 
@@ -30,7 +29,7 @@ pub(crate) fn parse_version(s: &str) -> (u32, u32, u32) {
         .split('.')
         .map(|p| {
             p.chars()
-                .take_while(|c| c.is_ascii_digit())
+                .take_while(char::is_ascii_digit)
                 .collect::<String>()
                 .parse::<u32>()
                 .unwrap_or(0)
@@ -67,7 +66,7 @@ fn git_head(dep_path: &PathBuf) -> Result<String> {
         .to_string())
 }
 
-/// Similar to git_head, this returns the HEAD commit SHA. However, this also
+/// Similar to `git_head`, this returns the HEAD commit SHA. However, this also
 /// returns whether the working directory has uncommitted changes (is "dirty").
 /// Since we can do both in one Git porcelain command, it's more efficient.
 fn git_head_and_dirty(dep_path: &PathBuf) -> Result<(String, bool)> {
@@ -111,7 +110,7 @@ pub(crate) fn cmd_version(verbose: bool) {
             }
         }
         "release" => {
-            let mut res = String::from("");
+            let mut res = String::new();
             res.push_str(match std::env::consts::OS {
                 "linux" => "[yellow]Linux[/yellow]",
                 "windows" => "[blue]Windows[/blue]",
@@ -125,23 +124,20 @@ pub(crate) fn cmd_version(verbose: bool) {
             res.push_str(std::env::consts::ARCH);
             res
         }
-        _ => "".to_string(),
+        _ => String::new(),
     };
 
-    let os_arch = match env!("ODYN_INSTALL_METHOD") {
-        "release" => String::new(),
-        _ => {
-            let os_name = match std::env::consts::OS {
-                "linux" => "[yellow]Linux[/yellow]",
-                "windows" => "[blue]Windows[/blue]",
-                "macos" => "[ansi(250)]macOS[/ansi(250)]",
-                "android" => "[green]Android[/green]",
-                "freebsd" => "[bright-red]FreeBSD[/bright-red]",
-                "netbsd" => "[ansi(214)]NetBSD[/ansi(214)]",
-                other => other,
-            };
-            format!("| {os_name} {}", std::env::consts::ARCH)
-        }
+    let os_arch = if env!("ODYN_INSTALL_METHOD") == "release" { String::new() } else {
+        let os_name = match std::env::consts::OS {
+            "linux" => "[yellow]Linux[/yellow]",
+            "windows" => "[blue]Windows[/blue]",
+            "macos" => "[ansi(250)]macOS[/ansi(250)]",
+            "android" => "[green]Android[/green]",
+            "freebsd" => "[bright-red]FreeBSD[/bright-red]",
+            "netbsd" => "[ansi(214)]NetBSD[/ansi(214)]",
+            other => other,
+        };
+        format!("| {os_name} {}", std::env::consts::ARCH)
     };
 
     let line = if os_arch.is_empty() {
@@ -165,9 +161,7 @@ pub(crate) fn cmd_version(verbose: bool) {
     }
 
     if verbose {
-        let install_path = std::env::current_exe()
-            .map(|p| p.display().to_string())
-            .unwrap_or_else(|_| "unknown".to_string());
+        let install_path = std::env::current_exe().map_or_else(|_| "unknown".to_string(), |p| p.display().to_string());
         cprintln!("    [dim]installed at {}[/dim]", install_path);
         cprintln!("    [dim]built on {}[/dim]", env!("ODYN_BUILD_DATE"));
     }
@@ -186,7 +180,7 @@ pub(crate) fn cmd_init(
         let lockfile = PathBuf::from(LOCKFILE);
 
         if deps_dir.exists() {
-            return Err(anyhow!("'{}' already exists", DEPS_DIR));
+            return Err(anyhow!("'{DEPS_DIR}' already exists"));
         }
         if lockfile.exists() {
             return Err(anyhow!("'Odyn.lock' already exists"));
@@ -524,7 +518,7 @@ pub(crate) fn cmd_update_self(
     let hash = Sha256::digest(&bytes);
     let actual = hash
         .iter()
-        .map(|b| format!("{:02x}", b))
+        .map(|b| format!("{b:02x}"))
         .collect::<String>();
 
     if actual != expected {
@@ -730,16 +724,16 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
             };
             if commit == dep.commit {
                 if dirty && force {
-                    result.push((dep, DepState::Missing))
+                    result.push((dep, DepState::Missing));
                 } else if dirty {
-                    result.push((dep, DepState::Dirty))
+                    result.push((dep, DepState::Dirty));
                 } else {
-                    result.push((dep, DepState::Ok))
+                    result.push((dep, DepState::Ok));
                 }
             } else if force {
-                result.push((dep, DepState::Missing))
+                result.push((dep, DepState::Missing));
             } else {
-                result.push((dep, DepState::Modified { actual: commit }))
+                result.push((dep, DepState::Modified { actual: commit }));
             }
         } else {
             result.push((dep, DepState::Missing));
@@ -792,17 +786,7 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
         let dep_path: PathBuf = PathBuf::from(DEPS_DIR).join(&dep.name);
         match state {
             DepState::Missing => {
-                if !dep_path.exists() {
-                    status("Syncing", "load", &format!("'{}', cloning...", dep.name));
-                    let clone_status = std::process::Command::new("git")
-                        .arg("clone")
-                        .arg(&dep.source)
-                        .arg(&dep_path)
-                        .status()?;
-                    if !clone_status.success() {
-                        return Err(anyhow!("failed to clone '{}'", dep.name));
-                    }
-                } else {
+                if dep_path.exists() {
                     let is_shallow = dep_path.join(".git").join("shallow").exists();
                     if is_shallow {
                         status(
@@ -845,6 +829,16 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
                         "load",
                         &format!("'{}' to pinned commit...", dep.name),
                     );
+                } else {
+                    status("Syncing", "load", &format!("'{}', cloning...", dep.name));
+                    let clone_status = std::process::Command::new("git")
+                        .arg("clone")
+                        .arg(&dep.source)
+                        .arg(&dep_path)
+                        .status()?;
+                    if !clone_status.success() {
+                        return Err(anyhow!("failed to clone '{}'", dep.name));
+                    }
                 }
                 let reset_status = std::process::Command::new("git")
                     .args(["reset", "--hard", dep.commit.as_str()])
