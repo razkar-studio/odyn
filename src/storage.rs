@@ -68,6 +68,7 @@ pub(crate) enum DepState {
     Ok,
     Missing,
     Modified { actual: String },
+    Dirty,
 }
 
 #[cfg(test)]
