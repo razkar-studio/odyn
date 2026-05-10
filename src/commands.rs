@@ -23,7 +23,7 @@ fn short(commit: &str) -> &str {
     &commit[..end]
 }
 
-pub(crate) fn parse_version(s: &str) -> (u32, u32, u32) {
+pub fn parse_version(s: &str) -> (u32, u32, u32) {
     let s = s.trim_start_matches('v');
     let parts: Vec<u32> = s
         .split('.')
@@ -43,7 +43,7 @@ pub(crate) fn parse_version(s: &str) -> (u32, u32, u32) {
     }
 }
 
-pub(crate) fn version_cmp(a: &str, b: &str) -> std::cmp::Ordering {
+pub fn version_cmp(a: &str, b: &str) -> std::cmp::Ordering {
     let (a_major, a_minor, a_patch) = parse_version(a);
     let (b_major, b_minor, b_patch) = parse_version(b);
     (a_major, a_minor, a_patch).cmp(&(b_major, b_minor, b_patch))
@@ -95,7 +95,7 @@ fn git_head_and_dirty(dep_path: &PathBuf) -> Result<(String, bool)> {
     Ok((commit, dirty))
 }
 
-pub(crate) fn cmd_version(verbose: bool) {
+pub fn cmd_version(verbose: bool) {
     let special = match env!("ODYN_INSTALL_METHOD") {
         "cargo" => "[ansi(173)]Cargo Edition".to_string(),
         "source" => {
@@ -167,7 +167,7 @@ pub(crate) fn cmd_version(verbose: bool) {
     }
 }
 
-pub(crate) fn cmd_init(
+pub fn cmd_init(
     project_name: String,
     license: String,
     with_readme: bool,
@@ -254,7 +254,7 @@ pub(crate) fn cmd_init(
     Ok(())
 }
 
-pub(crate) fn cmd_update_self(
+pub fn cmd_update_self(
     pre_release: bool,
     nightly: bool,
     commit_override: Option<String>,
@@ -575,7 +575,7 @@ pub(crate) fn cmd_update_self(
     Ok(())
 }
 
-pub(crate) fn cmd_remove(name: String) -> Result<()> {
+pub fn cmd_remove(name: String) -> Result<()> {
     let mut lockfile: Lockfile = load_lockfile()?;
     if !lockfile.dep.iter().any(|dep| dep.name == name) {
         return Err(anyhow!("dependency '{name}' not found in Odyn.lock"));
@@ -592,7 +592,7 @@ pub(crate) fn cmd_remove(name: String) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_update(name: String) -> Result<()> {
+pub fn cmd_update(name: String) -> Result<()> {
     check_git()?;
     let mut lockfile: Lockfile = load_lockfile()?;
     if !lockfile.dep.iter().any(|dep| dep.name == name) {
@@ -640,7 +640,7 @@ pub(crate) fn cmd_update(name: String) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_status() -> Result<()> {
+pub fn cmd_status() -> Result<()> {
     check_git()?;
     let lockfile: Lockfile = load_lockfile()?;
 
@@ -697,7 +697,7 @@ pub(crate) fn cmd_status() -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
+pub fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
     check_git()?;
     let lockfile: Lockfile = load_lockfile()?;
 
@@ -754,7 +754,7 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
     let dirty: Vec<_> = result
         .iter()
         .filter_map(|(dep, state)| {
-            if let DepState::Dirty = state {
+            if matches!(state, DepState::Dirty) {
                 Some(*dep)
             } else {
                 None
@@ -869,7 +869,7 @@ pub(crate) fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_get(
+pub fn cmd_get(
     source: String,
     name: Option<String>,
     platform: String,
@@ -1006,7 +1006,7 @@ pub(crate) fn cmd_get(
     };
 
     lockfile.dep.push(Dep {
-        name: name.clone(),
+        name: name,
         source,
         commit,
     });

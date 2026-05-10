@@ -1,6 +1,6 @@
 use farben::{cprintln, style};
 
-pub(crate) fn init_styles() {
+pub fn init_styles() {
     style!("load", "[bold blue]");
     style!("success", "[load]");
     style!("warn", "[bold yellow]");
@@ -9,6 +9,6 @@ pub(crate) fn init_styles() {
     style!("done", "[load]");
 }
 
-pub(crate) fn status(label: &str, style: &str, message: &str) {
+pub fn status(label: &str, style: &str, message: &str) {
     cprintln!("[{style}]{:>12}[/] {message}", label);
 }
