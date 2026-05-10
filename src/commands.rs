@@ -6,12 +6,12 @@ use crate::{
         MIT_LICENSE, MPL2_LICENSE, OLS_JSON, UNLICENSE, VERSION, ZLIB_LICENSE,
     },
     storage::{
-        check_git, gen_main_odin, load_lockfile, save_lockfile, save_lockfile_at, Dep, DepState,
-        Lockfile,
+        Dep, DepState, Lockfile, check_git, gen_main_odin, load_lockfile, save_lockfile,
+        save_lockfile_at,
     },
     ui::status,
 };
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use farben::{ceprintln, cprintln};
 use sha2::{Digest, Sha256};
 
@@ -75,10 +75,7 @@ fn git_head_and_dirty(dep_path: &PathBuf) -> Result<(String, bool)> {
         .current_dir(dep_path)
         .output()?;
     if !output.status.success() {
-        return Err(anyhow!(
-            "git status failed in '{}'",
-            dep_path.display()
-        ));
+        return Err(anyhow!("git status failed in '{}'", dep_path.display()));
     }
     let stdout = String::from_utf8(output.stdout)
         .map_err(|e| anyhow!("git output was not valid UTF-8: {e}"))?;
@@ -87,7 +84,12 @@ fn git_head_and_dirty(dep_path: &PathBuf) -> Result<(String, bool)> {
         .lines()
         .find(|l| l.starts_with("# branch.oid "))
         .and_then(|l| l.strip_prefix("# branch.oid "))
-        .ok_or_else(|| anyhow!("could not find commit in git status output for '{}'", dep_path.display()))?
+        .ok_or_else(|| {
+            anyhow!(
+                "could not find commit in git status output for '{}'",
+                dep_path.display()
+            )
+        })?
         .trim()
         .to_string();
     // See if there are any changes in the working directory
@@ -127,7 +129,9 @@ pub fn cmd_version(verbose: bool) {
         _ => String::new(),
     };
 
-    let os_arch = if env!("ODYN_INSTALL_METHOD") == "release" { String::new() } else {
+    let os_arch = if env!("ODYN_INSTALL_METHOD") == "release" {
+        String::new()
+    } else {
         let os_name = match std::env::consts::OS {
             "linux" => "[yellow]Linux[/yellow]",
             "windows" => "[blue]Windows[/blue]",
@@ -161,7 +165,8 @@ pub fn cmd_version(verbose: bool) {
     }
 
     if verbose {
-        let install_path = std::env::current_exe().map_or_else(|_| "unknown".to_string(), |p| p.display().to_string());
+        let install_path = std::env::current_exe()
+            .map_or_else(|_| "unknown".to_string(), |p| p.display().to_string());
         cprintln!("    [dim]installed at {}[/dim]", install_path);
         cprintln!("    [dim]built on {}[/dim]", env!("ODYN_BUILD_DATE"));
     }
@@ -516,10 +521,7 @@ pub fn cmd_update_self(
 
     let bytes = std::fs::read(&temp_path)?;
     let hash = Sha256::digest(&bytes);
-    let actual = hash
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect::<String>();
+    let actual = hash.iter().map(|b| format!("{b:02x}")).collect::<String>();
 
     if actual != expected {
         std::fs::remove_file(&temp_path).ok();
@@ -802,7 +804,10 @@ pub fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
                             status(
                                 "Hint",
                                 "info",
-                                &format!("unshallow failed for '{}', trying shallow fetch of pinned commit", dep.name),
+                                &format!(
+                                    "unshallow failed for '{}', trying shallow fetch of pinned commit",
+                                    dep.name
+                                ),
                             );
                             std::process::Command::new("git")
                                 .args(["fetch", "origin", dep.commit.as_str(), "--quiet"])

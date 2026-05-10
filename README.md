@@ -226,4 +226,4 @@ See [CHANGELOG.md](CHANGELOG.md) for a full history of changes.
 Licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE) at your option.
 
 Cheers, RazkarStudio.  
-© 2026 RazkarStudio. All rights reserved.
+Copyright © 2026 RazkarStudio and contributors. All rights reserved.

@@ -1,12 +1,12 @@
 [package]
 name = "odyn"
-version = "0.4.0-rc"
+version = "0.4.0-rc2.dev"
 edition = "2024"
 build = "build.rs"
 description = "Reproducible vendoring for Odin. Not a package manager."
 license = "MIT OR Apache-2.0"
 repository = "https://codeberg.org/razkar/odyn"
-homepage = "https://codeberg.org/razkar/odyn"
+homepage = "https://razkar.codeberg.page/odyn"
 keywords = ["odin", "vendoring", "dependency", "lockfile"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"

@@ -16,7 +16,8 @@ fn main() {
             .args(["rev-parse", "--short", "HEAD"])
             .output()
             .ok()
-            .and_then(|o| String::from_utf8(o.stdout).ok()).map_or_else(|| "unknown".to_string(), |s| s.trim().to_string());
+            .and_then(|o| String::from_utf8(o.stdout).ok())
+            .map_or_else(|| "unknown".to_string(), |s| s.trim().to_string());
 
         println!("cargo:rustc-env=ODYN_GIT_HASH={hash}");
     }
@@ -33,7 +34,8 @@ fn main() {
                 .args(["-Command", "Get-Date -Format 'yyyy-MM-dd'"])
                 .output()
                 .ok()
-                .and_then(|o| String::from_utf8(o.stdout).ok()).map_or_else(|| "unknown".to_string(), |s| s.trim().to_string())
+                .and_then(|o| String::from_utf8(o.stdout).ok())
+                .map_or_else(|| "unknown".to_string(), |s| s.trim().to_string())
         });
 
     println!("cargo:rustc-env=ODYN_BUILD_DATE={build_date}");
