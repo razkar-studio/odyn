@@ -2,6 +2,37 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
+## [0.4.0] - 2026-05-16
+
+### Added
+
+- `odyn sync` now detects uncommitted local changes (dirty working directories) and reports them as `Dirty` state instead of silently treating them as `Ok`
+- New `Dirty` variant to `DepState` enum for tracking dependencies with uncommitted changes
+
+### Changed
+
+- Version bumped to `0.4.0`
+- `farben` dependency updated from `0.9.0` to `0.18.1`
+  + Updating `farben` gives the latest fixes and patches, but also automatic lossy color degrading, TTY and env detection.
+- Homepage URL updated to `https://razkar.codeberg.page/odyn`
+- Multiple `pub(crate)` items changed to `pub` visibility (`cmd_version`, `cmd_init`, `cmd_update_self`, `cmd_remove`, `cmd_update`, `cmd_status`, `cmd_sync`, `cmd_get`, `parse_version`, `version_cmp`, `check_git`, `load_lockfile`, `save_lockfile`, `save_lockfile_at`, `gen_main_odin`, `Dep`, `Lockfile`, `DepState`, `init_styles`, `status`)
+- Copyright notice updated to include contributors
+
+### Fixed
+
+- `odyn sync` now properly errors when dependencies have uncommitted local changes, preventing silent sync failures
+- Clone operation in `cmd_sync` now happens before unshallow fetch for missing dependencies, fixing order of operations
+
+### Internal
+
+- Applied clippy pedantic and nursery lint fixes across the codebase
+- Modernized string formatting to use inline format variables (`{var}` instead of `{}`, `char::is_ascii_digit` instead of closure)
+- Replaced `unwrap_or_else` with `map_or_else` where appropriate
+- Replaced `String::from("")` with `String::new()`
+- Reordered imports alphabetically
+- Expanded CLI `--help` documentation with multi-line descriptions for all subcommands and flags
+- Updated CLI help text to use backtick formatting for directory names (`odyn_deps`)
+
 ## [0.4.0-rc] - 2026-04-03
 
 ### Added

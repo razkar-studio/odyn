@@ -199,18 +199,18 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "farben"
-version = "0.9.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37a86e3ff47b44a60fa34e4709b81e4246f72cb3dfcc96326758f32e3487567a"
+checksum = "853609baeff50e5c2954cea5bf4ee0e8a4342b1d611e4709d482be2cb883c319"
 dependencies = [
  "farben-core",
 ]
 
 [[package]]
 name = "farben-core"
-version = "0.6.3"
+version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa8360acf1bbeabbc2ad5de0b256adb3122a7832c7b003f1a5b6a0997722ce4b"
+checksum = "e70d8cb117d59cf22c1db2f9ea092ce1208b14e5048dbd4d9dc9e8ccef3dde07"
 
 [[package]]
 name = "find-msvc-tools"
@@ -328,7 +328,7 @@ dependencies = [
 
 [[package]]
 name = "odyn"
-version = "0.4.0-rc2.dev"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "clap",
