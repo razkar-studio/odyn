@@ -248,12 +248,16 @@ jobs:
           target: aarch64-pc-windows-msvc
 
       - name: Build
-        run: ODYN_INSTALL_METHOD=release cargo build --release --no-default-features --target aarch64-pc-windows-msvc
+        run: |
+          $env:ODYN_INSTALL_METHOD = "release"
+          cargo build --release --no-default-features --target aarch64-pc-windows-msvc
+        shell: pwsh
 
       - name: Rename
-        run: cp target/aarch64-pc-windows-msvc/release/odyn.exe odyn-windows-aarch64.exe
+        run: Copy-Item target/aarch64-pc-windows-msvc/release/odyn.exe odyn-windows-aarch64.exe
 
       - name: Upload to Codeberg release
+        shell: bash
         run: |
           RELEASE_ID=$(curl -sf \
             -H "Authorization: token ${{ secrets.CODEBERG_TOKEN }}" \
