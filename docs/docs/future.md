@@ -13,6 +13,7 @@ A checklist of thoughts for the future of Odyn.
 - [x] `get`: `--depth`
 - [x] `get`: `-- ...` where `...` gets sourced to `git clone`
 - [ ] `get`: `sync`-ing inside dependencies if `Odyn.lock` exists inside it
+  + fights the philosophy, so probs not... an alternative is a warning log when a `get`ted dep has a lockfile.
 - [ ] fixing possible bugs
 - [x] adding bugs
 - [x] `update-self`: `--pre-release` queries the latest release of Odyn regardless of stability

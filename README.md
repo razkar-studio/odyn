@@ -221,6 +221,10 @@ Maybe, maybe not. It's not planned, but it's not off the list.
 
 See [CHANGELOG.md](CHANGELOG.md) for a full history of changes.
 
+## The Zen of Odyn
+
+The Zen of Odyn, a set of principles for decisions, can be found in the docs [here](https://razkar.codeberg.page/odyn/docs/zen)
+
 ## License
 
 Licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE) at your option.
