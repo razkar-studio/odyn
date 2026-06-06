@@ -19,6 +19,7 @@ Odyn is constantly updating. All notable changes to it is documented here.
 ### Changed
 
 - Log outputs pipe to `stderr` now
+- The project is now licensed under Apache-2.0
 
 ## [0.4.0] - 2026-05-16
 
