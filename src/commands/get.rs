@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::process::Stdio;
 
 use anyhow::{Result, anyhow};
 
@@ -103,17 +104,17 @@ pub fn cmd_get(
     std::fs::create_dir_all(PathBuf::from(DEPS_DIR))?;
 
     let mut cmd = std::process::Command::new("git");
-    cmd.arg("clone");
+    cmd.arg("clone").arg("--progress");
     if let Some(n) = depth {
         cmd.args(["--depth", &n.to_string()]);
     }
     cmd.args(extra_args);
     cmd.arg(&source).arg(&dep_path);
-    let exit_status = cmd.status()?;
+    cmd.stderr(Stdio::piped());
 
-    if !exit_status.success() {
-        return Err(anyhow!("git clone failed"));
-    }
+    let child = cmd.spawn()?;
+
+    super::git_clone_with_progress(child, &name)?;
 
     let commit = match commit {
         Some(c) => {

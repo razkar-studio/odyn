@@ -1,10 +1,10 @@
 [package]
 name = "odyn"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2024"
 build = "build.rs"
 description = "Reproducible vendoring for Odin. Not a package manager."
-license = "MIT OR Apache-2.0"
+license = "Apache-2.0"
 repository = "https://codeberg.org/razkar/odyn"
 homepage = "https://razkar.codeberg.page/odyn"
 keywords = ["odin", "vendoring", "dependency", "lockfile"]
@@ -14,7 +14,7 @@ readme = "README.md"
 [dependencies]
 anyhow = "1.0.102"
 clap = { version = "4.6.0", features = ["derive"] }
-farben = "0.18.1"
+farben = "0.20"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.11.0"

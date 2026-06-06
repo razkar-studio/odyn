@@ -36,5 +36,3 @@
 | *NetBSD*                | x86_64        | :white_check_mark: Supported  |
 | *Solaris*               | SPARCv9       | :x: Not Available (duh)       |
 | *Others*                | Others        | Build from source / Use Cargo |
-
-If macOS support isn't visible in the Releases page, the GitHub runner probably failed.

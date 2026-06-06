@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::process::Stdio;
 
 use anyhow::{Result, anyhow};
 
@@ -145,18 +146,21 @@ pub fn cmd_sync(force: bool, skip: Vec<String>) -> Result<()> {
                     );
                 } else {
                     status("Syncing", "load", &format!("'{}', cloning...", dep.name));
-                    let clone_status = std::process::Command::new("git")
-                        .arg("clone")
+                    let mut cmd = std::process::Command::new("git");
+                    cmd.arg("clone")
+                        .arg("--progress")
                         .arg(&dep.source)
                         .arg(&dep_path)
-                        .status()?;
-                    if !clone_status.success() {
-                        return Err(anyhow!("failed to clone '{}'", dep.name));
-                    }
+                        .stderr(Stdio::piped());
+                    let child = cmd.spawn()?;
+
+                    super::git_clone_with_progress(child, &dep.name)?;
                 }
                 let reset_status = std::process::Command::new("git")
                     .args(["reset", "--hard", dep.commit.as_str()])
                     .current_dir(&dep_path)
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
                     .status()?;
                 if !reset_status.success() {
                     return Err(anyhow!("failed to reset '{}' to pinned commit", dep.name));

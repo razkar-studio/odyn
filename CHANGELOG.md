@@ -2,6 +2,24 @@
 
 Odyn is constantly updating. All notable changes to it is documented here.
 
+## [0.4.1] - 2026-06-06
+
+### Fixed
+
+- `odyn status` now correctly reports `Dirty` when a dependency has uncommitted local changes instead of silently treating it as `Ok`
+- `odyn get` and `odyn sync` no longer leak raw git output to the terminal
+
+### Added
+
+- `odyn get` now shows a real-time progress bar while cloning, with phase labels (`Cloning`, `Compressing`, `Resolving`) driven by git's actual progress output instead of raw git output
+- `odyn sync` uses the same progress bar for clone operations
+- When a clone fails, git's own error message is now shown before Odyn's error, making it clear what went wrong
+- Progress bar and cursor hiding are automatically disabled when output is piped or redirected, keeping CI logs clean
+
+### Changed
+
+- Log outputs pipe to `stderr` now
+
 ## [0.4.0] - 2026-05-16
 
 ### Added

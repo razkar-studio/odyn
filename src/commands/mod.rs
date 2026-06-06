@@ -7,9 +7,13 @@ mod update;
 mod update_self;
 mod version;
 
-use std::path::PathBuf;
+use std::{
+    io::{BufRead, IsTerminal},
+    path::PathBuf,
+};
 
 use anyhow::{Result, anyhow};
+use farben::prelude::*;
 
 pub use get::cmd_get;
 pub use init::cmd_init;
@@ -95,6 +99,87 @@ fn git_head_and_dirty(dep_path: &PathBuf) -> Result<(String, bool)> {
         .to_string();
     let dirty = stdout.lines().any(|l| !l.starts_with('#'));
     Ok((commit, dirty))
+}
+
+struct ShowCursor;
+impl Drop for ShowCursor {
+    fn drop(&mut self) {
+        eprint!("\x1b[?25h");
+        let _ = std::io::Write::flush(&mut std::io::stderr());
+    }
+}
+
+pub fn git_clone_with_progress(mut child: std::process::Child, name: &str) -> Result<()> {
+    let mut error_lines: Vec<String> = Vec::new();
+    if std::io::stdout().is_terminal() {
+        if let Some(stderr) = child.stderr.take() {
+            let reader = std::io::BufReader::new(stderr);
+            eprint!("\x1b[?25l");
+            let _ = std::io::Write::flush(&mut std::io::stderr());
+            let _cursor_guard = ShowCursor;
+            for line in reader.split(b'\r') {
+                let line = line?;
+                let text = String::from_utf8_lossy(&line);
+                if text.contains("done.") {
+                    continue;
+                }
+                let label = if text.contains("Receiving objects") {
+                    Some("Cloning")
+                } else if text.contains("Resolving deltas") {
+                    Some("Resolving")
+                } else if text.contains("Compressing") {
+                    Some("Compressing")
+                } else {
+                    None
+                };
+                if let Some(label) = label {
+                    if let Some(pct_pos) = text.find('%') {
+                        let before = &text[..pct_pos];
+                        if let Some(pct_str) = before.split_whitespace().last() {
+                            if let Ok(pct) = pct_str.parse::<u64>() {
+                                let filled = (pct * 16 / 100) as usize;
+                                let bar = if pct >= 100 {
+                                    "=".repeat(16)
+                                } else {
+                                    format!(
+                                        "{}>{}",
+                                        "=".repeat(filled.saturating_sub(1)),
+                                        " ".repeat(16 - filled)
+                                    )
+                                };
+                                ceprint!(
+                                    "\r[load]{:>12}[/] '{name}' [[{bar}]] {pct:>3}% \r",
+                                    label,
+                                );
+                                let _ = std::io::Write::flush(&mut std::io::stderr());
+                            }
+                        }
+                    }
+                } else {
+                    error_lines.push(text.to_string())
+                }
+            }
+            eprint!("\r\x1b[2K");
+            let _ = std::io::Write::flush(&mut std::io::stderr());
+        }
+    } else {
+        eprint!("     Cloning '{name}'...\n");
+        let _ = std::io::Write::flush(&mut std::io::stderr());
+    }
+
+    let exit_status = child.wait()?;
+    if !exit_status.success() {
+        eprint!("\r\x1b[2K");
+        for line in &error_lines {
+            let line = line.trim();
+            if !line.is_empty() {
+                eprintln!("{line}");
+            }
+        }
+        return Err(anyhow!("failed to clone '{name}'"));
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]

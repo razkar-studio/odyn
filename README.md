@@ -20,9 +20,7 @@
 
 ---
 
-Odyn clones Git repos into `odyn_deps/` and writes the commit hash to `Odyn.lock`. That's it. You could do this yourself with a spreadsheet and a free afternoon, and Odyn knows it.
-
-It has no registry, no account, nor any solver. No transitive dependencies filling everything up without you knowing.
+Odyn clones Git repos into `odyn_deps/` and writes the commit hash to `Odyn.lock`, and you can replicate it with Git and a man with a spreadsheet. It's made for the ease of development for the Odin programming language, while staying true to the language's philosophy.
 
 Before you ask anything or make any complaints: please read the [FaQs](#frequently-asked-questions)!
 
@@ -33,12 +31,12 @@ odyn init myproject
 cd myproject
 
 odyn get odin-community/math
-# or: odyn get razkar/farben --platform codeberg
+# or: odyn get razkar/odyn --platform codeberg
 
 odyn sync
 ```
 
-`odyn init` gives you a working project layout with `ols.json` already configured, so your editor's autocomplete works out of the box. `odyn get` clones and pins. `odyn sync` makes everything match the lockfile, on any machine, every time.
+`odyn init` gives you a working project layout with `ols.json` already configured for editor autocomplete, `odyn get` clones and pins, and `odyn sync` makes everything match the lockfile.
 
 ## Installation
 
@@ -46,9 +44,7 @@ odyn sync
 
 For Odyn to function properly, the requirements are the following:
 
-* Git in your `PATH`, or beside the Odyn binary
-
-Yep, that's it.
+* Git in your `PATH` or somewhere Odyn can reach
 
 ### Install Script
 
@@ -156,7 +152,7 @@ source = "https://github.com/odin-community/math"
 commit = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
 ```
 
-Commit `Odyn.lock`. That's what makes `odyn sync` reproduce the exact state on another machine. Gitignore `odyn_deps/` if you want, or commit it too. Either works. The lockfile is the important part.
+Commit `Odyn.lock` to version control for `odyn sync`. Gitignore `odyn_deps/` if you want, or commit it too. Either works. The lockfile is the important part.
 
 ## Importing Dependencies
 
@@ -175,6 +171,7 @@ odin run src -collection:deps=odyn_deps
 ## Frequently Asked Questions
 
 ### Q. Why Rust?
+Familiarity, but also
 Rust makes cross-compilation easy with `cross`, which allows Odyn to have a wide binary matrix.
 Pre-built binaries are the recommended install path for Odyn, and having Odyn support more platforms is never a negative.
 
@@ -207,15 +204,12 @@ The happy path looks simple, but the moment you step off the happy path, submodu
 * A collaborator runs `git pull` on the parent: the submodule pointer updates but the actual submodule content doesn't unless they also run `git submodule update`. Now their build is broken and they don't know why.
   + Compared to Odyn: `odyn sync` again.
 
-If I liked using git submodules, Odyn wouldn't exist. Let that sink in.
+If I liked using git submodules, Odyn wouldn't exist.
 
 That being said, if you're comfortable with git submodules, just use it. There's no one forcing you to use Odyn, whatever thing works for you, just use it.
 
-### Q. Who Are You?
-Uhh, what?
-
 ### Q. Will Odyn Be Getting An Odin Rewrite?
-Maybe, maybe not. It's not planned, but it's not off the list.
+Maybe. It's not planned, but it's not off the list.
 
 ## Changelog
 
@@ -227,7 +221,16 @@ The Zen of Odyn, a set of principles for decisions, can be found in the docs [he
 
 ## License
 
-Licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE) at your option.
+Licensed under the [Apache-2.0](LICENSE) license.
 
-Cheers, RazkarStudio.  
+In short:
+
+* You can use the software for anything, including commercial work
+* You can modify it, redistribute it, and bundle it into your own projects
+* You can keep your own project closed source if you want
+* You must keep the original license and copyright notices
+* Contributors cannot later claim you are not allowed to use the code they contributed
+
+Cheers, RazkarStudio.
+
 Copyright © 2026 RazkarStudio and contributors. All rights reserved.

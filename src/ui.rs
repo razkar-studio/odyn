@@ -1,4 +1,4 @@
-use farben::{cprintln, style};
+use farben::{ceprintln, style};
 
 pub fn init_styles() {
     style!("load", "[bold blue]");
@@ -10,5 +10,5 @@ pub fn init_styles() {
 }
 
 pub fn status(label: &str, style: &str, message: &str) {
-    cprintln!("[{style}]{:>12}[/] {message}", label);
+    ceprintln!("[{style}]{:>12}[/] {message}", label);
 }

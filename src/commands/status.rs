@@ -6,7 +6,7 @@ use crate::constants::DEPS_DIR;
 use crate::storage::{Lockfile, check_git, load_lockfile};
 use crate::ui::status;
 
-use super::{git_head, short};
+use super::{git_head_and_dirty, short};
 
 pub fn cmd_status() -> Result<()> {
     check_git()?;
@@ -28,7 +28,7 @@ pub fn cmd_status() -> Result<()> {
             continue;
         }
 
-        let commit = match git_head(&dep_path) {
+        let (commit, dirty) = match git_head_and_dirty(&dep_path) {
             Ok(c) => c,
             Err(e) => {
                 status("Error", "error", &format!("'{}': {e}", dep.name));
@@ -38,11 +38,20 @@ pub fn cmd_status() -> Result<()> {
         };
 
         if commit == dep.commit {
-            status(
-                "Ok",
-                "success",
-                &format!("'{}' at {}", dep.name, short(&dep.commit)),
-            );
+            if dirty {
+                any_bad = true;
+                status(
+                    "Dirty",
+                    "error",
+                    &format!("'{}': has uncommitted local changes", dep.name),
+                );
+            } else {
+                status(
+                    "Ok",
+                    "success",
+                    &format!("'{}' at {}", dep.name, short(&dep.commit)),
+                );
+            }
         } else {
             status(
                 "Modified",
