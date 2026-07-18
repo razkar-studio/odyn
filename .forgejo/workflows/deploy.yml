@@ -30,6 +30,6 @@ jobs:
       - name: Deploy to pages branch
         uses: https://codeberg.org/git-pages/action@v2
         with:
-          site: "https://razkar.codeberg.page/odyn/"
+          site: "https://razkar.codeberg.page/odyn-archive/"
           token: ${{ forge.token }}
           source: docs/build/
